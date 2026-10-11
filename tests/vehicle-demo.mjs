@@ -103,14 +103,14 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   await page.getByRole('button',{name:'Merge tabs',exact:true}).click();
   const panel=page.getByRole('region',{name:'G60 3D component priorities'});
   await panel.locator('.vehicle-demo-presets summary').click();
-  for(const [label,concept] of [['Larger screen','screen'],['Larger air vents','vents'],['Adjustable seats','seats']]){
+  for(const [label,concept] of [['Larger screen','screen'],['Larger air vents','vents'],['New seat upholstery','seats']]){
     await panel.getByRole('button',{name:new RegExp(label)}).click();
     await page.waitForFunction(()=>document.querySelector('.hosted-model-status')?.textContent?.includes('Preview applied'));
-    if(concept==='seats')await page.waitForFunction(()=>window.viewerOperations.some(o=>o.op==='matrix'&&o.data.m[13]===.2&&o.data.m[14]===.38));
+    if(concept==='seats')await page.waitForFunction(()=>window.viewerOperations.some(o=>o.op==='matrix'&&o.data.m.every((v,i)=>v===([0,5,10,15].includes(i)?1:0))));
     else await panel.locator(`[data-surface=${concept}][data-changed=true]`).waitFor();
   }
   await panel.getByRole('button',{name:'Show new seats',exact:true}).click();
-  await panel.locator('.model-surface-label').filter({hasText:'NEW SEATS · teal upholstery + revised profile'}).waitFor();
+  await panel.locator('.model-surface-label').filter({hasText:'NEW SEATS · teal upholstery'}).waitFor();
   await page.waitForFunction(()=>window.viewerOperations.filter(o=>o.op==='material'&&o.data.name==='Seats').at(-1)?.data.channels.AlbedoPBR.color?.[1]===.48);
   await panel.getByRole('button',{name:'Baseline',exact:true}).click();
   await page.waitForFunction(()=>window.viewerOperations.filter(o=>o.op==='matrix').at(-1)?.data.m[13]===0);
@@ -143,4 +143,7 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   assert.equal(writes.length,1,'Only explicit approval saves to disposable database');
   assert.deepEqual(errors,[]);
   console.log('Passed separate/merged tabs, problem detail/citations, filtering, ranking, selection continuity, hosted SDK changes/reset, mobile layout and approval persistence.');
-} finally {await browser?.close();backend.kill('SIGTERM');}
+} finally {
+  for(const context of browser?.contexts()||[])for(const page of context.pages())await page.unrouteAll({behavior:'ignoreErrors'});
+  await browser?.close();backend.kill('SIGTERM');
+}

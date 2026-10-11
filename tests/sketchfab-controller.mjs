@@ -19,9 +19,8 @@ const controller=new G60Controller(api);
 try{
  await controller.initialize();
  await controller.apply({highlighted:['seats'],concepts:['seats'],opacity:.2});
- assert.equal(matrix[13],.2);assert.equal(matrix[14],.38);
+ assert.deepEqual(matrix,identity,'After preserves seat placement and proportions');
  assert.deepEqual(changes.get('Seats').channels.AlbedoPBR.color,[.015,.48,.62],'After shows new upholstery instead of red selection paint');
- assert.equal(matrix[0],1.06);assert.equal(matrix[5],1.08);assert.equal(matrix[10],.9);
  await new Promise(resolve=>setTimeout(resolve,750));
  assert.deepEqual(changes.get('Seats').channels.AlbedoPBR.color,[.015,.48,.62],'Selection pulse does not overwrite the new design');
  await controller.apply({highlighted:[],concepts:[],opacity:1});

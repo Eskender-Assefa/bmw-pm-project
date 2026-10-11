@@ -43,11 +43,6 @@ export const CAMERAS:Record<CameraView,{position:number[];target:number[]}>= {
 function call<T>(invoke:(callback:Callback<T>)=>void):Promise<T>{
   return new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Sketchfab did not acknowledge the change.')),12000);invoke((error,value)=>{clearTimeout(timer);error?reject(new Error(String(error))):resolve(value);});});
 }
-export function seatMatrix(original:number[],changed:boolean){
-  const next=[...original];
-  if(changed){for(let row=0;row<3;row++){next[row]*=1.06;next[4+row]*=1.08;next[8+row]*=.9;}next[13]+=.2;next[14]+=.38;}
-  return next;
-}
 export class G60Controller {
   private materials:Material[]=[];
   private seats:SceneNode|undefined;
@@ -117,7 +112,7 @@ export class G60Controller {
       await call(cb=>this.api.setMaterial(material,cb));
       if(pulseNames.includes(material.name)&&!(material.name==='Seats'&&concepts.includes('seats')))this.pulseMaterials.push(material);
     }
-    if(this.seats&&this.seatOriginal.length===16)await call(cb=>this.api.setMatrix(this.seats!.instanceID,seatMatrix(this.seatOriginal,concepts.includes('seats')),cb));
+    if(this.seats&&this.seatOriginal.length===16)await call(cb=>this.api.setMatrix(this.seats!.instanceID,[...this.seatOriginal],cb));
     if(this.disposed)return '';
     const pulse=(bright:boolean)=>{for(const original of this.pulseMaterials){const m=structuredClone(original);m.channels.AlbedoPBR={enable:true,factor:1,color:bright?[1,.015,.025]:[.2,.01,.015]};m.channels.EmitColor={enable:true,color:bright?[1,.015,.025]:[.3,.005,.01],factor:bright?.9:.25,type:'additive'};this.api.setMaterial(m);}};
     pulse(true);
