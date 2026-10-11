@@ -24,7 +24,7 @@ function VehicleWorkspace({requirements,categories,cohort,focused,onReview,onCon
   const [sort,setSort]=useState<RequirementSort>('priority'),[descending,setDescending]=useState(true),[selectedId,setSelectedId]=useState('');
   const [opacity,setOpacity]=useState(.2),[view,setView]=useState<CameraView>('exterior'),[reset,setReset]=useState(0),[showBaseline,setShowBaseline]=useState(false),[manualConcept,setManualConcept]=useState<Concept|null>(null);
   const cameraIntent=useRef(0);
-  const [allowLive,setAllowLive]=useState(false);
+  const [allowLive,setAllowLive]=useState(true);
   const [mapping,setMapping]=useState<{id:string;target:Target}|null>(null),[mappingBusy,setMappingBusy]=useState(false);
   const rows=useMemo(()=>sortRequirements(requirements.filter(r=>(!category||r.category===category)&&(band==='all'||(band==='critical'?r.critical:r.band===band))&&(status==='all'||r.status===status)&&`${r.feature} ${r.title} ${r.description}`.toLowerCase().includes(query.toLowerCase())),sort,descending),[requirements,category,band,status,query,sort,descending]);
   const selected=focused||rows.find(r=>r.id===selectedId)||rows[0];

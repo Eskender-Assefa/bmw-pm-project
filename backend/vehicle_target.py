@@ -85,6 +85,8 @@ def resolve_target(item, cohort, allow_live=False):
             CACHE[key]=output
             while len(CACHE)>256:CACHE.popitem(last=False)
         return output
-    except Exception:
+    except Exception as error:
         # Do not expose provider exception text or credentials to the browser.
+        if getattr(error,'status_code',None)==401:
+            return local_target(item,'OpenAI rejected the configured API key. Update the server credential; local matching is active.')
         return local_target(item,'AI mapping is unavailable. Using local text matching.')

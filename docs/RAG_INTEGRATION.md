@@ -12,4 +12,4 @@ Resolve citations against retained source records before displaying them. Keep g
 
 Extension points: `RequirementDrawer` for cited interpretation; `VehiclePreview` for the selected validated concept; existing `EvidenceModal` for original citations. Final endpoint and payload shapes remain to be agreed with the engine team.
 
-The separate `/api/v1/vehicle-target` classifier now supplies constrained part IDs and an optional supported design preset on row selection, with explicit live-AI opt-in and a labelled local fallback. The future RAG engine can supply the same validated contract. It does not replace the ten source categories or estimate benefit/ROI.
+The separate `/api/v1/vehicle-target` classifier now supplies constrained part IDs and an optional supported design preset on row selection, with user-authorized live AI enabled by default, an off switch, and a labelled local fallback. The future RAG engine can supply the same validated contract. It does not replace the ten source categories or estimate benefit/ROI.

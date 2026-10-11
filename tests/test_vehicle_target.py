@@ -44,3 +44,13 @@ def test_live_provider_is_not_contacted_without_opt_in(monkeypatch):
     def forbidden(**kwargs):raise AssertionError('Provider should not be constructed')
     monkeypatch.setattr(openai,'OpenAI',forbidden)
     assert resolve_target(item('Touch screen, operation'),Cohort()).method=='local'
+
+
+def test_invalid_credential_is_actionable_without_exposing_error_text(monkeypatch):
+    monkeypatch.setenv('OPENAI_API_KEY','test-only-placeholder');CACHE.clear()
+    class CredentialError(Exception):status_code=401
+    def fail(**kwargs):raise CredentialError('private provider error text')
+    monkeypatch.setattr(openai,'OpenAI',lambda **kwargs:SimpleNamespace(responses=SimpleNamespace(parse=fail)))
+    result=resolve_target(item('Touch screen, operation'),Cohort(),allow_live=True)
+    assert result.method=='local' and result.components==['screen']
+    assert 'API key' in result.notice and 'private provider' not in result.notice
