@@ -1,16 +1,47 @@
 # Editable local website
 
-Run `npm run dev` in this folder, then open http://127.0.0.1:3001.
-The backend runs on port 8001. Stop both with Ctrl+C.
+The working folder is `/home/soham/bmw-pm-editable-3d`. The backup at
+`/home/soham/bmw-pm-project-master/editable-copy` is separate.
 
-The home page opens the sidebar cockpit. Its five dashboard tabs are unchanged. The G60 3D preview is embedded in Overview and requirement review; it is not an extra tab.
+Run `BMWPM_WEB_PORT=3002 BMWPM_API_PORT=8002 npm run dev` here, then open
+http://127.0.0.1:3002. Stop both processes with Ctrl+C. The launcher defaults to
+3001/8001 when those environment overrides are absent.
 
-The combined HTML interface remains available at `/studio.html`. Edit `public/studio.html` for its page structure, `public/studio.css` for its appearance, and `public/studio.js` for its API connections. Refresh the browser after editing these static files. The original HTML is preserved unchanged at `public/legacy/BMW_Product_Decision_Prototype.html` and can be opened at `/legacy/BMW_Product_Decision_Prototype.html`. Its local prototype actions and simulated scores remain separate from backend decisions.
+The home page and `/cockpit` open the same sidebar application. Problems and
+3D model can merge side by side. Successor brief, USPs & cost and Market trends
+are the three handover panels. Document intelligence and Reviews & Comments
+include the supplied RAG, review and Reddit collection workflows.
 
-The React dashboard is also available at `/cockpit`. Edit `src/components/cockpit.tsx` for that dashboard, `src/components/workspaces.tsx` for its evidence library, `src/app/globals.css` for its styling, and `backend/` for API behavior. React edits reload automatically; restart after Python edits. All Python APIs, migrations, source documents, tests and database remain in this folder.
+## Source map
 
-The 3D controls are in `src/components/vehicle-preview.tsx`, the Three.js scene in `src/components/vehicle-scene.tsx`, and editable geometry in `src/lib/g60-geometry.ts`. Feature mappings and colour rules are in `src/lib/vehicle-priority.ts`. Try buttons are temporary visual previews. The approval dialog can save a chosen design with the PM decision; accepted designs restore after reload. See `docs/G60_3D.md` and `docs/RAG_INTEGRATION.md` for extension points.
+- `src/components/cockpit.tsx`: navigation, cohort and shared job controls.
+- `src/app/premium-theme.css`: the Lovable-based dark styling and roundel layout.
+- `src/app/rag-theme.css`: matching styles for the imported RAG/reviews panels.
+- `src/components/problem-workspace.tsx`: ranked problems, scores, sources,
+  document-search links and the merged 3D workspace.
+- `src/components/vehicle-preview.tsx`, `sketchfab-g60.tsx`, and
+  `src/lib/sketchfab-controller.ts`: hosted G60 selection, highlights and previews.
+  `src/lib/vehicle-priority.ts` contains component mapping and presets.
+- `src/components/document-rag.tsx` and `document-mappings.tsx`: document import,
+  search, mapping review and cited answers; `backend/documents.py`, `rag.py`,
+  `rag_routes.py`, `rag_schemas.py` implement the supplied engine.
+- `src/components/reviews-comments.tsx` and `reddit-collection.tsx`: comment
+  browser and collection form; `backend/feedback.py`, `reddit_pipeline.py`,
+  `reddit_routes.py`, `reddit_collector/` and `Categorized-Scrapped-Data/` implement
+  the supplied pipeline.
+- `backend/`: Python API, scoring, requirement decisions and export.
+- `migrations/`: schema history, including `004_document_rag`.
 
-This copy has its own dependencies, source documents and SQLite database in `.local/cockpit.sqlite`. The original project remains in the parent folder.
+React edits reload automatically; restart after Python edits. The copy has its
+own source documents and SQLite database in `.local/cockpit.sqlite`. Dependencies,
+credentials, database state and generated artifacts stay outside Git. Back up the
+SQLite database with its backup API before migrations.
 
-The user-supplied Sketchfab reference is embedded by `src/components/sketchfab-g60.tsx`. Overview starts with this reference; selecting a ranked need opens the editable schematic automatically. Reference and interactive views share selection state, but geometry changes only affect the local schematic.
+The hosted G60 requires internet/WebGL. Seat previews change upholstery while
+preserving the seat position. The previous procedural Three.js implementation
+remains in source for reference. See [G60 notes](docs/G60_3D.md) and
+[RAG integration](docs/RAG_INTEGRATION.md).
+
+The combined HTML remains at `/studio.html` (`public/studio.html`, `studio.css`,
+`studio.js`). The original prototype is retained under `public/legacy/`. Its
+simulated scores and local actions remain separate from backend decisions.

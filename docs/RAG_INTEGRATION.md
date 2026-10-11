@@ -1,17 +1,45 @@
-# RAG integration handoff — proposed, not implemented
+# Integrated document and review workflows
 
-The RAG engine is being developed separately. No retrieval engine, vector store or indexing job is implemented here. The Problems tab displays imported source citations and a RAG connection-pending label; the 3D model tab can merge alongside it. The part classifier is a separate, user-authorized model call.
+The implementation from `bmw-pm-project-reviews-and-RAG` is part of this editable
+application. It uses the existing SQLite database, sources, evidence viewer,
+ten categories, job queue and audit log. The Lovable interface, Problems / 3D
+merge view, hosted G60, successor brief, USPs & cost and market trends remain.
 
-Connect the engine through a future server-side adapter in `backend/`; the React UI should continue talking to this application's same-origin `/api/v1` API. Whether the adapter imports a Python module or calls an external HTTP service can be decided with the engine team. Keep service credentials in the server environment.
+- **Document intelligence**: upload PDF/XLSX/CSV/TXT/MD, index retained sources,
+  search with local SQLite FTS5/BM25, review category/scope mappings, request
+  structured extraction, and ask questions with validated source citations.
+- **Reviews & Comments**: browse the selected feedback cohort with filters,
+  pagination and original-source links. The supplied Reddit collection and
+  categorisation scripts run through the existing persisted job queue and import
+  validated output, preserving unknown provenance and category review status.
+- **Problems → Search documents**: opens document search using the selected
+  requirement's feature wording and model. The document workspace applies its
+  own visible source/market/category filters; these do not redefine the feedback
+  cohort or demand denominator.
 
-Existing integration inputs are the selected `Cohort` (`model`, `country`, `powertrain`, `origin`), requirement ID/revision when present, original source IDs/checksums and evidence IDs/locators. Read APIs already expose sources, evidence, requirement detail and evidence search. General evidence search is a source explorer, not cohort-filtered retrieval; the adapter must apply the requested cohort before assembling context.
+The friend's retrieval, mapping, structured-answer validation, import and Reddit
+pipeline logic are retained. UI styling, sidebar navigation, port handling and
+job descriptions are integrated with this app. The standalone script dependency
+pins use the same OpenAI SDK version as the app. The supplied `g60_research`
+files remain available in the source tree; they are not silently imported as
+verified customer records or counted in existing demand.
 
-Proposed responses contain an answer, citations with existing evidence/source IDs and exact locators, uncertainties, and an optional proposed design concept. Limit design concepts to supported component IDs and the named `baseline`, `screen`, `vents`, or `seats` design presets in `src/lib/vehicle-priority.ts`. Do not execute generated code, arbitrary geometry scripts, or arbitrary URLs from engine output.
+Migration `004_document_rag` adds chunks, FTS and immutable answer history. After
+upgrading, choose **Index existing sources** once to populate document retrieval.
+Supported retained PDFs and spreadsheets are indexed; the PowerPoint reference
+remains available in Evidence library. No paid AI call occurs during startup,
+import, indexing, navigation or local search. Answer generation and AI extraction
+require the explicit checkbox and server `OPENAI_API_KEY`. Reddit collection uses
+the key entered for that run and clears it from the form after submission.
 
-Resolve citations against retained source records before displaying them. Keep generated interpretations separate from measured demand, PM impact bands and approved decisions. Require the existing PM review/revision flow to adopt changed requirement text. A proposed design concept may drive the preview controls after explicit selection, but should never silently save a decision or modify source evidence.
+RAG answers remain document interpretations. They do not auto-approve a requirement
+or animate the car. The existing `/api/v1/vehicle-target` classifier and reviewed
+design presets continue to control G60 highlighting and previews. This preserves
+the friend's evidence workflow and the existing 3D decision flow.
 
-Extension points: `ProblemWorkspace` for the problem list and source citations; `RequirementDrawer` for cited interpretation; `VehiclePreview` for the selected validated concept; existing `EvidenceModal` for original citations. Final endpoint and payload shapes remain to be agreed with the engine team.
+Details: [Document RAG](document-rag.md), [Reddit pipeline](reddit-pipeline.md),
+[G60 model](G60_3D.md). Tests mock external model calls; live provider availability
+is separate from the local integration checks.
 
-The separate `/api/v1/vehicle-target` classifier now supplies constrained part IDs and an optional supported design preset on row selection, with user-authorized live AI enabled by default, an off switch, and a labelled local fallback. The future RAG engine can supply the same validated contract. It does not replace the ten source categories or estimate benefit/ROI.
-
-The ranking response now includes `evidence_samples[].source = {id, filename, kind}` alongside the existing evidence ID, quote and locator. A future RAG adapter should resolve retrieved citations to this same source/evidence provenance, return retrieval status explicitly, and never relabel current imported snippets as RAG-generated answers. Screen and vent presets use projected surfaces on the hosted Sketchfab model, while seats use an assembly transform; see `sketchfab-controller.ts` for verified mesh capabilities.
+See [integration validation](RAG_INTEGRATION_VALIDATION.md) for the checks, retained
+data, and current live-provider limitation.

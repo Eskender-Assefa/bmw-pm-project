@@ -29,8 +29,16 @@ async def lifespan(app):
     recover_jobs()
     yield
 
+from .rag_routes import router as rag_router
+from .reddit_routes import router as reddit_router
+
 app=FastAPI(title='BMW Product Manager Cockpit',version='1.0.0',lifespan=lifespan)
+app.include_router(rag_router)
+app.include_router(reddit_router)
 ORIGINS=['http://127.0.0.1:3001','http://localhost:3001','http://127.0.0.1:8001','http://localhost:8001','http://127.0.0.1:3000','http://localhost:3000','http://127.0.0.1:8000','http://localhost:8000']
+web_port=int(os.getenv('BMWPM_WEB_PORT','3001'))
+if not 1<=web_port<=65535:raise ValueError('BMWPM_WEB_PORT must be a valid local port.')
+ORIGINS.extend([f'http://127.0.0.1:{web_port}',f'http://localhost:{web_port}'])
 app.add_middleware(CORSMiddleware,allow_origins=ORIGINS,allow_methods=['GET','POST'],allow_headers=['Content-Type'])
 app.add_middleware(TrustedHostMiddleware,allowed_hosts=['127.0.0.1','localhost','testserver'])
 
@@ -104,8 +112,8 @@ def sources(db:DB):
 def source_file(source_id:str,db:DB):
     source=db.get(Source,source_id)
     if not source: raise HTTPException(404,'Source not found.')
-    media={'pdf':'application/pdf','html':'text/html','pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation'}.get(source.format,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    return FileResponse(source.path,media_type=media,filename=source.filename,content_disposition_type='inline')
+    media={'pdf':'application/pdf','html':'text/html','csv':'text/csv','txt':'text/plain','md':'text/plain','zip':'application/zip','jsonl':'application/x-ndjson','pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation'}.get(source.format,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    return FileResponse(source.path,media_type=media,filename=source.filename,content_disposition_type='inline' if source.format=='pdf' else 'attachment')
 
 @app.get('/api/v1/sources/{source_id}/pages/{page_number}')
 def source_page(source_id:str,page_number:int,db:DB):
@@ -127,6 +135,11 @@ def source_page(source_id:str,page_number:int,db:DB):
                 bitmap.close();page.close()
                 temp.replace(cache)
     return FileResponse(cache,media_type='image/png',headers={'Cache-Control':'private, max-age=86400'})
+
+@app.get('/api/v1/feedback')
+def feedback_register(db:DB,cohort:COHORT,q:str='',category:str='',source_id:str='',offset:int=Query(0,ge=0),limit:int=Query(20,ge=1,le=100)):
+    from .feedback import list_feedback
+    return list_feedback(db,cohort,q,category,source_id,offset,limit)
 
 @app.get('/api/v1/evidence')
 def evidence_search(db:DB,q:str='',model:str|None=None,source_id:str|None=None,kind:str|None=None,origin:Literal['unknown','observed','synthetic','all']='all',offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=100)):
@@ -236,6 +249,7 @@ def job_status(job_id:str,db:DB):
 def retry_job(job_id:str,db:DB):
     job=db.get(Job,job_id)
     if not job or job.state not in ('failed','interrupted'):raise HTTPException(409,'Only failed or interrupted jobs can be retried.')
+    if job.kind=='reddit_pipeline':raise HTTPException(409,'Enter your API key on Reviews & Comments to start a new collection.')
     return enqueue(db,job.kind,job.input)
 
 @app.get('/api/v1/comparisons')

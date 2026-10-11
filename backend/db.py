@@ -19,9 +19,10 @@ def session_dependency():
 
 def create_search_index(connection):
     connection.execute(text("CREATE VIRTUAL TABLE IF NOT EXISTS evidence_fts USING fts5(evidence_id UNINDEXED, text, tokenize='unicode61')"))
+    connection.execute(text("CREATE VIRTUAL TABLE IF NOT EXISTS rag_fts USING fts5(chunk_id UNINDEXED, text, tokenize='unicode61')"))
 
 def install_guards(connection):
-    for table in ('audit_events', 'requirement_revisions', 'priority_runs', 'decisions', 'analysis_runs', 'exports'):
+    for table in ('audit_events', 'requirement_revisions', 'priority_runs', 'decisions', 'analysis_runs', 'exports', 'rag_runs'):
         for operation in ('UPDATE', 'DELETE'):
             connection.execute(text(f"CREATE TRIGGER IF NOT EXISTS immutable_{table}_{operation.lower()} BEFORE {operation} ON {table} BEGIN SELECT RAISE(ABORT, 'append-only record'); END"))
 

@@ -297,5 +297,7 @@ def test_migrations_bootstrap_fresh_database(tmp_path):
     result=subprocess.run([sys.executable,'-m','backend.cli','migrate'],cwd=ROOT,env=env,capture_output=True,text=True)
     assert result.returncode==0,result.stderr
     with sqlite3.connect(tmp_path/'fresh.sqlite') as db:
-        assert db.execute('select version_num from alembic_version').fetchone()[0]=='003_critical_scope'
-        assert db.execute("select count(*) from sqlite_master where type='trigger'").fetchone()[0]==12
+        assert db.execute('select version_num from alembic_version').fetchone()[0]=='004_document_rag'
+        for table in ('rag_chunks', 'rag_fts', 'rag_runs'):
+            assert db.execute("select name from sqlite_master where type='table' and name=?", (table,)).fetchone()
+        assert db.execute("select count(*) from sqlite_master where type='trigger'").fetchone()[0]==14
