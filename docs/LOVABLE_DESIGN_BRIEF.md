@@ -1,5 +1,9 @@
 # Lovable visual design brief
 
+## Result
+
+The [Premium Product Vision prototype](https://lovable.dev/projects/766e8a40-a0f2-4ab2-ac68-2309a4f8041d) was created in Lovable. Its graphite surfaces, compact navigation, blue interaction accents, and darker problem cards informed `src/app/premium-theme.css` in this repository. The prototype uses sample data; this application remains the source of truth for requirements, scores, citations, decisions, and the hosted Sketchfab G60.
+
 Use this prompt in Lovable to explore a new visual design. Lovable cannot import the existing `application_trial` repository, so treat its output as a design prototype. The maintained application remains the Next.js and Python project in this repository. Bring the chosen layout, styles, and components back into this repository after review.
 
 ## Prompt to paste into Lovable
