@@ -2,6 +2,10 @@
 
 ## Application Trial — combined local website
 
+## Portable Windows package
+
+The Windows x64 ZIP includes a native `Start BMW.exe` launcher, bundled Python dependencies, a prebuilt dashboard and a database/document snapshot. Extract the entire ZIP, then double-click the launcher. See [Windows instructions](docs/WINDOWS_PORTABLE.md).
+
 ## Handover panels
 
 The sidebar also includes **Successor brief**, **USPs & cost**, and **Market trends** from `bmw-handover.zip`. Their FastAPI routes are `/api/v1/successor`, `/api/v1/usp`, and `/api/v1/trends`; Keep and Lead proposal reviews use `/api/v1/successor/{id}/review` and the existing audit trail. The trends register is `fixtures/market-trends.json`. Cost is an adjustable estimate, and trend summaries remain pending source review. The RAG engine from `bmw-pm-project-reviews-and-RAG` is now integrated alongside these panels. The existing Problems, 3D model, merged view, evidence, comparison, decision, and Lovable-styled interface remain available.

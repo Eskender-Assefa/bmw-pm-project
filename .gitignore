@@ -14,3 +14,7 @@ __pycache__/
 !.env.example
 test-results/
 playwright-report/
+
+.windows-web/
+settings.json
+startup.log
