@@ -6,12 +6,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createG60Geometry } from '@/lib/g60-geometry';
 import { COMPONENTS, type CameraView, type ComponentId, type Concept, type Priority } from '@/lib/vehicle-priority';
 
-type Props = {priorities: Record<ComponentId,Priority>; selected: ComponentId|null; concept: Concept; opacity: number; view: CameraView; reset: number; onSelect: (id:ComponentId)=>void};
+type Props = {applied: Concept[]; priorities: Record<ComponentId,Priority>; selected: ComponentId|null; concept: Concept; opacity: number; view: CameraView; reset: number; onSelect: (id:ComponentId)=>void};
 export default function VehicleScene(props: Props) {
   const host=useRef<HTMLDivElement>(null),api=useRef<ReturnType<typeof createG60Geometry>|null>(null);
   const cameraApi=useRef<((view:CameraView)=>void)|null>(null),latest=useRef(props),[error,setError]=useState('');
-  useEffect(()=>{latest.current=props;api.current?.setStyle(props.priorities,props.selected,props.opacity);api.current?.setConcept(props.concept);},[props]);
-  useEffect(()=>{cameraApi.current?.(props.view);},[props.view,props.reset]);
+  useEffect(()=>{latest.current=props;api.current?.setStyle(props.priorities,props.selected,props.opacity);api.current?.setConcept(props.concept,props.applied);},[props]);
+  useEffect(()=>{cameraApi.current?.(props.view);},[props.view,props.reset,props.selected]);
   useEffect(()=>{
     const element=host.current;if(!element)return;
     let renderer:THREE.WebGLRenderer;
@@ -26,14 +26,20 @@ export default function VehicleScene(props: Props) {
     const key=new THREE.DirectionalLight('#ffffff',3);key.position.set(3,7,5);scene.add(key);
     const fill=new THREE.DirectionalLight('#99c9ff',2);fill.position.set(-3,3,-4);scene.add(fill);
     const car=createG60Geometry();scene.add(car.root);api.current=car;
-    car.setStyle(latest.current.priorities,latest.current.selected,latest.current.opacity);car.setConcept(latest.current.concept);
+    car.setStyle(latest.current.priorities,latest.current.selected,latest.current.opacity);car.setConcept(latest.current.concept,latest.current.applied);
     const grid=new THREE.GridHelper(12,36,'#a0b9ce','#d3e0ec');grid.position.y=-.035;scene.add(grid);
     const gridMaterials=Array.isArray(grid.material)?grid.material:[grid.material];gridMaterials.forEach(m=>{m.transparent=true;m.opacity=.45;});
+    const cameraTarget=new THREE.Vector3(),lookTarget=new THREE.Vector3();
+    const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let cameraMoving=false;
+    controls.addEventListener('start',()=>{cameraMoving=false;});
     const setCamera=(view:CameraView)=>{
-      const positions:Record<CameraView,[number,number,number]>={exterior:[5.8,3.9,6.2],cabin:[-1.6,2.55,2.5],top:[.01,7,.001],side:[0,1.6,7.2]};
-      camera.position.set(...positions[view]);controls.target.set(view==='cabin'?-.1:0,view==='cabin'?.8:.55,0);controls.update();
+      const positions:Record<CameraView,[number,number,number]>={exterior:[5.8,3.9,6.2],cabin:latest.current.selected==='seats'?[-2.2,2.1,2.4]:[-1.35,1.85,2.25],top:[.01,7,.001],side:[0,1.6,7.2]};
+      cameraTarget.set(...positions[view]);lookTarget.set(view==='cabin'?.05:0,view==='cabin'?1:.55,0);cameraMoving=true;
+      if(reducedMotion){camera.position.copy(cameraTarget);controls.target.copy(lookTarget);cameraMoving=false;}
+      controls.update();
     };
-    cameraApi.current=setCamera;setCamera(latest.current.view);
+    camera.position.set(5.8,3.9,6.2);controls.target.set(0,.55,0);cameraApi.current=setCamera;setCamera(latest.current.view);
     const observer=new ResizeObserver(()=>{const {width,height}=element.getBoundingClientRect();if(width&&height){renderer.setSize(width,height);camera.aspect=width/height;camera.updateProjectionMatrix();}});observer.observe(element);
     let visible=true;const intersection=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});intersection.observe(element);
     const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let down:[number,number]=[0,0];
@@ -49,7 +55,8 @@ export default function VehicleScene(props: Props) {
     const draw=(now:number)=>{
       frame=requestAnimationFrame(draw);const delta=Math.min((now-previous)/1000,.05);previous=now;
       if(!visible||document.hidden)return;
-      car.update(delta);controls.update();renderer.render(scene,camera);
+      if(cameraMoving){camera.position.lerp(cameraTarget,1-Math.exp(-4*delta));controls.target.lerp(lookTarget,1-Math.exp(-4*delta));if(camera.position.distanceTo(cameraTarget)<.005)cameraMoving=false;}
+      car.update(reducedMotion?2:delta);controls.update();renderer.render(scene,camera);
       element.dataset.rendered='true';element.dataset.frames=String(++frames);
       for(const label of element.querySelectorAll<HTMLButtonElement>('[data-anchor]')){
         const id=label.dataset.anchor as ComponentId;point.copy(car.anchors[id]).project(camera);
@@ -61,7 +68,7 @@ export default function VehicleScene(props: Props) {
     const onLost=(event:Event)=>{event.preventDefault();setError('The 3D context was interrupted. Reload this page to restore the model.');};renderer.domElement.addEventListener('webglcontextlost',onLost);
     return ()=>{cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();controls.dispose();renderer.domElement.removeEventListener('pointerdown',onDown);renderer.domElement.removeEventListener('pointerup',onUp);renderer.domElement.removeEventListener('webglcontextlost',onLost);car.dispose();grid.geometry.dispose();gridMaterials.forEach(m=>m.dispose());renderer.dispose();renderer.domElement.remove();api.current=null;cameraApi.current=null;};
   },[]);
-  return <div className="vehicle-canvas" ref={host} data-concept={props.concept} data-component={props.selected||'none'} data-view={props.view}>
+  return <div className="vehicle-canvas" ref={host} data-concept={props.concept} data-component={props.selected||'none'} data-view={props.view} data-applied={props.applied.join(',')}>
     {error?<div className="vehicle-fallback" role="alert">{error}</div>:<>
       <div className="vehicle-canvas-tag"><span/>G60 · 5 SERIES<span className="vehicle-canvas-sub">Interactive schematic</span></div>
       {(['screen','vents','seats','drivetrain','brakes'] as ComponentId[]).map(id=><button key={id} data-anchor={id} title={`Select ${COMPONENTS[id]}`} aria-label={`Select ${COMPONENTS[id]} on model`} className={'vehicle-hotspot '+(props.selected===id?'active':'')} onClick={()=>props.onSelect(id)}><i/>{id==='screen'?'Display':id==='vents'?'Air vents':id==='seats'?'Seats':COMPONENTS[id]}</button>)}

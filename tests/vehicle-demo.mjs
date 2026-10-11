@@ -1,3 +1,6 @@
+import { spawn, execFileSync } from 'node:child_process';
+import { createServer } from 'node:net';
+import { once } from 'node:events';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -27,24 +30,34 @@ const geometry=createG60Geometry();
 const size=id=>{geometry.root.updateMatrixWorld(true);return new THREE.Box3().setFromObject(geometry.components[id]).getSize(new THREE.Vector3());};
 const baselineScreen=size('screen'),baselineVents=size('vents');
 geometry.setConcept('screen');for(let i=0;i<100;i++)geometry.update(.05);
-assert.ok(size('screen').z>baselineScreen.z*1.3,'Screen geometry actually becomes wider');
+assert.ok(size('screen').z>baselineScreen.z*1.75,'Screen geometry actually becomes wider');
 geometry.setConcept('vents');for(let i=0;i<100;i++)geometry.update(.05);
-assert.ok(size('vents').y>baselineVents.y*1.5,'Vent openings actually become taller');
+assert.ok(size('vents').y>baselineVents.y*2.9,'Vent openings actually become taller');
 const seat=geometry.components.seats.children.find(child=>child instanceof THREE.Group);
 const baseSeat=seat.position.clone();geometry.setConcept('seats');for(let i=0;i<100;i++)geometry.update(.05);
-assert.ok(seat.position.x>baseSeat.x+.15&&seat.position.y>baseSeat.y+.05,'Seats move and rise');
+assert.ok(seat.position.x>baseSeat.x+.35&&seat.position.y>baseSeat.y+.18,'Seats move and rise');
 geometry.setConcept('baseline');for(let i=0;i<100;i++)geometry.update(.05);
 assert.ok(Math.abs(size('screen').z-baselineScreen.z)<.001);assert.ok(seat.position.distanceTo(baseSeat)<.001);
 geometry.setStyle(priorities,null,.2);
 assert.equal(geometry.components.brakes.children[0].material.color.getHexString(),'ef4444');
+geometry.setConcept('seats',['screen','vents']);for(let i=0;i<100;i++)geometry.update(.05);
+assert.ok(size('screen').z>baselineScreen.z*1.75&&size('vents').y>baselineVents.y*2.9,'Accepted designs accumulate');
 geometry.dispose();
 console.log('Passed component mapping, truthful priority colours, actual mesh transformations and reset.');
 
-const browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH||path.join(root,'.local/browser-cache/chromium-1248/chrome-linux64/chrome'),headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const dataDir=path.join(output,'db-'+Date.now());
+execFileSync(path.join(root,'.venv/bin/python'),['-c','import pathlib,sqlite3,sys; p=pathlib.Path(sys.argv[2]); p.mkdir(parents=True); src=sqlite3.connect("file:"+sys.argv[1]+"?mode=ro",uri=True); dst=sqlite3.connect(p/"cockpit.sqlite"); src.backup(dst); dst.close(); src.close()',path.join(root,'.local/cockpit.sqlite'),dataDir]);
+const socket=createServer();socket.listen(0,'127.0.0.1');await once(socket,'listening');const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));
+const apiUrl=`http://127.0.0.1:${port}`;
+const backend=spawn(path.join(root,'.venv/bin/python'),['-m','uvicorn','backend.app:app','--host','127.0.0.1','--port',String(port)],{cwd:root,env:{...process.env,BMWPM_DATA_DIR:dataDir,BMWPM_DATABASE_URL:`sqlite:///${dataDir}/cockpit.sqlite`},stdio:'ignore'});
+let browser;
 try {
+for(let i=0;i<100;i++){try{if((await fetch(apiUrl+'/api/v1/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
+browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH||path.join(root,'.local/browser-cache/chromium-1248/chrome-linux64/chrome'),headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const page=await browser.newPage({viewport:{width:1500,height:1100}});page.setDefaultTimeout(30000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const writes=[];page.on('request',r=>{if(r.method()==='POST')writes.push(r.url());});
+  await page.route('**/api/v1/**',async route=>{const url=new URL(route.request().url());const response=await route.fetch({url:apiUrl+url.pathname+url.search});await route.fulfill({response});});
   await page.goto('http://127.0.0.1:3001/',{waitUntil:'domcontentloaded'});
   const tabs=page.locator('.sidebar nav .nav-item');
   assert.deepEqual(await tabs.allTextContents(),['Overview','Requirements','Evidence library','Comparisons','Decisions & audit']);
@@ -54,7 +67,7 @@ try {
   for(const [name,concept] of [['Larger screen','screen'],['Larger air vents','vents'],['Adjustable seats','seats']]) {
     await panel.getByRole('button',{name:new RegExp(name)}).click();
     await panel.locator(`[data-concept=${concept}][data-view=cabin]`).waitFor();
-    await page.waitForTimeout(500); // Allow the short mesh transition to settle before visual comparison.
+    await page.waitForTimeout(1400); // Allow the short mesh transition to settle before visual comparison.
     assert.ok((await panel.getByTestId('concept-status').textContent()).startsWith('Concept:'));
     await panel.screenshot({path:path.join(output,concept+'.png')});
   }
@@ -81,6 +94,32 @@ try {
   await page.getByRole('region',{name:'G60 3D component priorities'}).screenshot({path:path.join(output,'mobile.png')});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'No page overflow on mobile');
   assert.deepEqual(writes,[],'Concepts must not save decisions or call AI');
+  await page.setViewportSize({width:1500,height:1100});
+  await page.getByRole('button',{name:'Requirements',exact:true}).click();
+  await page.getByLabel('Search requirements').fill('Touch screen');
+  await page.getByRole('button',{name:'Touch screen, operation',exact:true}).click();
+  const acceptedDrawer=page.getByRole('dialog',{name:'Requirement review'});
+  await acceptedDrawer.locator('[data-rendered=true]').waitFor();
+  await acceptedDrawer.getByRole('button',{name:/Larger screen/}).click();
+  await acceptedDrawer.getByRole('button',{name:'Approve',exact:true}).click();
+  const approval=page.getByRole('dialog',{name:'Approve requirement',exact:true});
+  assert.equal(await approval.getByLabel('Accepted 3D design').inputValue(),'screen');
+  await approval.getByRole('button',{name:'Record decision'}).click();
+  await acceptedDrawer.locator('[data-applied=screen][data-rendered=true]').waitFor();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button',{name:'Overview',exact:true}).click();
+  await page.locator('[data-applied=screen][data-rendered=true]').waitFor();
+  await page.reload();
+  await page.locator('[data-applied=screen][data-rendered=true]').waitFor();
+  const accepted=page.getByRole('region',{name:'G60 3D component priorities'});
+  await accepted.getByRole('button',{name:'Cabin',exact:true}).click();
+  await page.waitForTimeout(1500);
+  await accepted.screenshot({path:path.join(output,'accepted.png')});
+  await accepted.getByRole('button',{name:'Baseline',exact:true}).click();
+  await accepted.locator('[data-applied=""][data-concept=baseline]').waitFor();
+  await accepted.getByRole('button',{name:'After',exact:true}).click();
+  await accepted.locator('[data-applied=screen]').waitFor();
+  assert.equal(writes.length,1,'Only the explicit approval saves to the disposable database');
   assert.deepEqual(errors,[],'No browser JavaScript errors');
-  console.log('Passed unchanged dashboard tabs, WebGL rendering, all concepts, baseline reset, requirement focus, G60-only support, mobile layout and no backend writes.');
-} finally {await browser.close();}
+  console.log('Passed unchanged tabs, WebGL, amplified concepts, comparison/reset, requirement focus, mobile layout, and explicit approval persistence after reload in a disposable database.');
+} finally {await browser?.close();backend.kill('SIGTERM');}

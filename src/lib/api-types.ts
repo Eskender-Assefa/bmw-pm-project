@@ -642,6 +642,8 @@ export interface components {
             acceptance_criteria?: string[] | null;
             /** Analysis Run Id */
             analysis_run_id?: string | null;
+            /** Design Concept */
+            design_concept?: ("screen" | "vents" | "seats") | null;
         };
         /** EvaluationRequest */
         EvaluationRequest: {
@@ -776,6 +778,8 @@ export interface components {
             revision: number;
             /** Status */
             status: string;
+            /** Design Concept */
+            design_concept?: ("screen" | "vents" | "seats") | null;
             /** Band */
             band: string;
             /** Critical */

@@ -128,15 +128,39 @@ export function createG60Geometry() {
     drivetrain:new THREE.Vector3(1.48,.91,0),brakes:new THREE.Vector3(1.45,.38,1.05),battery:new THREE.Vector3(-.2,.3,-.74),
     steering:new THREE.Vector3(.21,1.06,.44),lighting:new THREE.Vector3(2.47,.82,.65),assistance:new THREE.Vector3(2.53,.47,0),storage:new THREE.Vector3(-2.04,.95,0),
   };
-  let target: Concept = 'baseline', progress = 0;
+  const baselineGhosts = new THREE.Group();root.add(baselineGhosts);
+  const outlines = {} as Record<'screen'|'vents'|'seats',THREE.BoxHelper>;
+  const ghosts = {} as Record<'screen'|'vents'|'seats',THREE.Group>;
+  root.updateMatrixWorld(true);
+  for(const id of ['screen','vents','seats'] as const) {
+    const ghost=components[id].clone(true);
+    ghost.traverse(obj=>{if(obj instanceof THREE.Mesh)obj.material=new THREE.MeshBasicMaterial({color:'#b4e9ff',wireframe:true,transparent:true,opacity:.12,depthWrite:false});});
+    ghost.visible=false;baselineGhosts.add(ghost);ghosts[id]=ghost;
+    const outline=new THREE.BoxHelper(components[id],'#00e5ff');
+    const m=outline.material as THREE.LineBasicMaterial;m.transparent=true;m.opacity=.85;m.depthTest=false;
+    outline.renderOrder=10;outline.visible=false;root.add(outline);outlines[id]=outline;
+  }
+  const progress={screen:0,vents:0,seats:0};
+  let targets = new Set<Concept>(), elapsed=0;
   return {root, components, anchors,
-    setConcept(value: Concept) {target=value;},
+    setConcept(value: Concept, applied: Concept[] = []) {targets=new Set([...applied,...(value==='baseline'?[]:[value])]);},
     update(delta: number) {
-      progress=THREE.MathUtils.damp(progress,target==='baseline'?0:1,8,delta);
-      const screenScale=target==='screen'?progress:0, ventScale=target==='vents'?progress:0, seatShift=target==='seats'?progress:0;
-      display.scale.set(1,1+screenScale*.22,1+screenScale*.42);
-      vents.scale.set(1,1+ventScale*.65,1+ventScale*.13);
-      frontSeats.forEach((seat,i)=>{seat.position.x=-.2+seatShift*.19;seat.position.y=.57+seatShift*.075;backrests[i].rotation.z=seatShift*.18;});
+      elapsed+=delta;
+      for(const id of ['screen','vents','seats'] as const)progress[id]=THREE.MathUtils.damp(progress[id],targets.has(id)?1:0,3.8,delta);
+      const screenScale=progress.screen,ventScale=progress.vents,seatShift=progress.seats;
+      display.scale.set(1,1+screenScale*.65,1+screenScale*.8);
+      display.position.y=1.1+screenScale*.13;
+      vents.scale.set(1,1+ventScale*2,1+ventScale*.18);
+      frontSeats.forEach((seat,i)=>{seat.position.x=-.2+seatShift*.38;seat.position.y=.57+seatShift*.20;backrests[i].rotation.z=seatShift*.5;});
+      root.updateMatrixWorld(true);
+      for(const id of ['screen','vents','seats'] as const){
+        ghosts[id].visible=progress[id]>.01;outlines[id].visible=progress[id]>.01;
+        outlines[id].update();
+        (outlines[id].material as THREE.LineBasicMaterial).opacity=.65+Math.sin(elapsed*3)*.2;
+      }
+      anchors.screen.set(.4,1.3+screenScale*.3,-.18);
+      anchors.vents.set(.45,.96+ventScale*.12,.65);
+      anchors.seats.set(-.45+seatShift*.38,1.28+seatShift*.20,.47);
     },
     setStyle(priorities: Record<ComponentId,Priority>, selected: ComponentId|null, opacity: number) {
       for(const id of Object.keys(COMPONENTS) as ComponentId[]) {

@@ -47,3 +47,17 @@ export function conceptForRequirement(r: Pick<RequirementView, 'feature' | 'titl
   if (id === 'seats' && /adjustab|adjustment|recline/.test(wording)) return 'seats';
   return 'baseline';
 }
+
+export const DESIGN_CONCEPTS = {
+  screen: {title: 'Panoramic display', metric: '+80%', detail: 'display width', description: 'Expanded display · +65% height'},
+  vents: {title: 'Expanded air vents', metric: '3×', detail: 'opening height', description: 'Larger openings · +18% span'},
+  seats: {title: 'Adaptive seating', metric: '3 AXES', detail: 'visible movement', description: '38 cm slide · 20 cm lift · 29° recline'},
+} as const;
+export function approvalConcept(r: Pick<RequirementView,'feature'|'design_concept'>): Concept {
+  if(r.design_concept)return r.design_concept;
+  const part=componentForRequirement(r);
+  return part==='screen'||part==='vents'||part==='seats'?part:'baseline';
+}
+export function approvedConcepts(requirements: RequirementView[]): Exclude<Concept,'baseline'>[] {
+  return [...new Set(requirements.filter(r=>r.status==='approved'&&r.design_concept).map(r=>r.design_concept!))];
+}

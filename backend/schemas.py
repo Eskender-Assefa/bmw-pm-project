@@ -17,6 +17,7 @@ class RequirementView(BaseModel):
     acceptance_criteria: list[str]
     revision: int
     status: str
+    design_concept: Literal['screen','vents','seats'] | None = None
     band: str
     critical: bool
     numerator: int
@@ -54,6 +55,7 @@ class DecisionRequest(BaseModel):
     description: str | None = Field(default=None, min_length=10, max_length=4000)
     acceptance_criteria: list[str] | None = None
     analysis_run_id: str | None = None
+    design_concept: Literal['screen','vents','seats'] | None = None
 
 class ImportRequest(BaseModel):
     path: str
