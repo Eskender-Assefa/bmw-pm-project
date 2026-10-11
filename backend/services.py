@@ -54,7 +54,7 @@ def ranking(session, cohort: Cohort, category=None):
         if decision.snapshot.get('cohort')==cohort.model_dump():
             state[decision.requirement_id]=decision
     output=[]
-    refs={}
+    sources={source.id:source for source in session.scalars(select(Source))}
     for req in requirements:
         items=groups.get(req.feature_id,[])
         if not items: continue
@@ -70,7 +70,8 @@ def ranking(session, cohort: Cohort, category=None):
             if len(samples)>=3: break
             if any(s['feedback_id']==f.id for s in samples): continue
             ref=session.get(EvidenceRef,a.evidence_id)
-            samples.append({'id':ref.id,'feedback_id':f.id,'external_id':f.external_id,'quote':a.quote,'country':f.country,'type':a.feedback_type,'locator':ref.locator})
+            source=sources.get(ref.source_id)
+            samples.append({'source':{'id':source.id,'filename':source.filename,'kind':source.kind} if source else None,'id':ref.id,'feedback_id':f.id,'external_id':f.external_id,'quote':a.quote,'country':f.country,'type':a.feedback_type,'locator':ref.locator})
         revision=revisions[req.id]
         decision=state.get(req.id)
         current=decision.current if decision and decision.revision==req.current_revision else {'status':'proposed','band':'Unscored'}

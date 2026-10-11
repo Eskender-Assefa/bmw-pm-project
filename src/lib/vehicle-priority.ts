@@ -51,7 +51,7 @@ export function conceptForRequirement(r: Pick<RequirementView, 'feature' | 'titl
 export const DESIGN_CONCEPTS = {
   screen: {title: 'Panoramic display', metric: '+80%', detail: 'display width', description: 'Expanded display · +65% height'},
   vents: {title: 'Expanded air vents', metric: '3×', detail: 'opening height', description: 'Larger openings · +18% span'},
-  seats: {title: 'Adaptive seating', metric: '3 AXES', detail: 'visible movement', description: '38 cm slide · 20 cm lift · 29° recline'},
+  seats: {title: 'Adaptive seating', metric: '2 AXES', detail: 'seat assembly movement', description: '38 cm slide · 20 cm lift · illustrative assembly movement'},
 } as const;
 export function approvalConcept(r: Pick<RequirementView,'feature'|'design_concept'>): Concept {
   if(r.design_concept)return r.design_concept;

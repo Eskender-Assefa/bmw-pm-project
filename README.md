@@ -2,7 +2,7 @@
 
 ## Application Trial — combined local website
 
-This copy uses the original React cockpit with its five sidebar tabs: Overview, Requirements, Evidence library, Comparisons, and Decisions & audit. Start with `npm run dev` and open **http://127.0.0.1:3001**. The API runs on port **8001**. Overview embeds the user-supplied BMW G60 reference from Sketchfab with author attribution, alongside a ranked, filterable improvement list. Clicking a need opens the interactive G60 schematic. Clicking a need automatically locates and pulses its part in red and previews supported screen, vent or seat changes. Requirement review uses the same mapping; live AI mapping is enabled by default with the user’s authorization and can be turned off in the panel. See [the 3D model notes](docs/G60_3D.md). The connected HTML Studio remains at `/studio.html`, and the original prototype remains at `/legacy/BMW_Product_Decision_Prototype.html`.
+This editable copy has six sidebar tabs: Overview, Problems, 3D model, Evidence library, Comparisons, and Decisions & audit. Start with `npm run dev` and open **http://127.0.0.1:3001** (API: **8001**). Problems shows detailed needs, original source citations and scores. **Merge tabs** connects it side by side with the hosted BMW G60 model; the selection and filters persist between the two views. The model itself receives red part highlights, transparency, screen/vent surface concepts and seat-assembly movement through Sketchfab's supported API. Approved presets persist with PM decisions. Live AI part identification is authorized, enabled by default and has a visible local fallback. The separate RAG engine is not yet connected. See [the model notes](docs/G60_3D.md). The connected HTML Studio remains at `/studio.html`, and the original prototype remains at `/legacy/BMW_Product_Decision_Prototype.html`.
 
 For a fresh Linux checkout (Node.js 20.9+ and Python required):
 
@@ -19,7 +19,7 @@ See [EDITING.md](EDITING.md) for the source-file map. Dependencies, local databa
 
 The notes below describe the original full dataset. This copy contains the G60 subset, and its launcher uses ports 3001/8001 instead of 3000/8000.
 
-A local G60-led hackathon application for exploring supplied evidence, reviewing customer requirements, recording PM decisions and exporting an executive PowerPoint. F70 and G70 are imported alongside G60. The English interface has five views: Overview, Requirements, Evidence library, Comparisons, and Decisions & audit.
+A local G60-led hackathon application for exploring supplied evidence, reviewing customer requirements, recording PM decisions and exporting an executive PowerPoint. F70 and G70 are imported alongside G60. The English interface has six views: Overview, Problems, 3D model, Evidence library, Comparisons, and Decisions & audit.
 
 ## Run the prepared workspace
 
