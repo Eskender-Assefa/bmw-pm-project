@@ -1,0 +1,35 @@
+/* Keep the imported document/review workflows in the cockpit's existing palette. */
+.rag-workspace h1 { font-size:27px; font-weight:600; letter-spacing:-.5px; }
+.rag-workspace h2 { font-weight:600; }
+.rag-filters input, .rag-filters select, .rag-question textarea, .rag-question select {
+  background:var(--surface-raised); color:var(--text); border-color:var(--border); border-radius:3px;
+}
+.rag-passage, .rag-overview table, .review-comment { background:var(--surface); border-radius:3px; }
+.rag-consent, .rag-overview-heading p, .rag-overview-heading span, .rag-data-note,
+.rag-overview small, .rag-feature-table .rag-unknown, .rag-row-quote p { color:var(--muted); }
+.rag-passage blockquote, .review-comment-text { color:var(--text); }
+.rag-overview caption { color:var(--muted); background:var(--surface-soft); padding:10px 12px; }
+.rag-overview thead th { color:var(--muted); background:var(--surface-raised); }
+.rag-coverage-table .is-selected { background:var(--accent-soft); }
+.rag-citation, .rag-row-quote blockquote { background:var(--success-soft); border-color:var(--success-border); }
+.rag-answer ul, .review-duplicate, .reddit-result-counts .reddit-shortfall,
+.reddit-result-counts .reddit-shortfall strong { color:var(--warning); }
+.rag-more-filters summary, .rag-row-quote summary { color:var(--blue); }
+.rag-assignment { border-radius:3px; }
+.reviews-intro { background:var(--surface); border-color:var(--border); border-radius:3px; }
+.reviews-intro-icon, .review-comment-avatar { background:var(--surface-raised); border-color:var(--border); color:var(--blue); border-radius:3px; }
+.reviews-intro p, .reviews-register-label, .review-comment-identity p, .review-comment-context p,
+.review-comment-footer strong, .reddit-collection-form label>span, .reddit-run-note,
+.reddit-run>p, .reddit-result-counts { color:var(--muted); }
+.reviews-list { background:var(--surface-soft); }
+.review-comment-context, .review-comment-footer { border-color:var(--border); }
+.review-comment-context>span, .review-comment-footer small, .reddit-collection-form small,
+.reddit-run-heading strong span, .reddit-run>small { color:var(--subtle); }
+.reddit-result-counts strong { color:var(--text); }
+.reddit-collection h2 svg { color:var(--blue); }
+.reddit-collection-form input, .reddit-collection-form select { border:1px solid var(--border); border-radius:3px; padding:8px 10px; }
+.rag-workspace .rag-metrics { color:var(--muted); font-size:11px; }
+@media(max-width:900px) {
+  .rag-feature-table tr { border-color:var(--border); }
+  .rag-feature-table td::before { color:var(--subtle); }
+}

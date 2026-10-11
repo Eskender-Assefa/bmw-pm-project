@@ -1,0 +1,285 @@
+{
+  "id": "market-trends-2026-10",
+  "version": "1.0",
+  "title": "Global market and technology trends",
+  "origin": "observed",
+  "review_status": "pending",
+  "collected_at": "2026-10-11",
+  "generator": "Web search summaries collected for the hackathon cockpit; not yet checked against the original pages by a product manager",
+  "notice": "Each trend summarises public reporting found by web search on the collection date. Summaries have not been verified against the original articles, several sources are secondary press, and dated claims may have changed. Review the linked sources before relying on a trend.",
+  "trends": [
+    {
+      "id": "ultra-fast-charging",
+      "title": "800-volt and megawatt charging reset charging-time expectations",
+      "summary": "BYD opened its first 1,500 kW flash-charging station in Germany in 2026 and reports thousands of sites in China, while BMW's first Neue Klasse model moves to 800 volts with up to 400 kW charging. Headline power is an architectural maximum; reported European output per cable is lower and few vehicles are compatible yet.",
+      "categories": ["C02"],
+      "horizon": "now",
+      "markets": ["Europe", "China"],
+      "powertrains": ["BEV"],
+      "features": ["Charge high-voltage battery", "Public charging / external providers", "High-voltage charging power socket"],
+      "sources": [
+        {"title": "BYD deploys first 1,500 kW German flash charging station in 3,000-site European push", "publisher": "CarNewsChina", "url": "https://carnewschina.com/2026/06/09/byd-deploys-first-1500-kw-german-flash-charging-station-in-3000-site-european-push/", "published": "2026-06-09"},
+        {"title": "BYD begins large-scale deployment of megawatt flash charging facilities", "publisher": "CnEVPost", "url": "https://cnevpost.com/2026/02/24/byd-begins-large-scale-deployment-megawatt-flash-charging-facilities/", "published": "2026-02-24"},
+        {"title": "2026 BMW iX3 can do up to 800 km, 400kW maximum charging", "publisher": "AutoIndustriya", "url": "https://www.autoindustriya.com/auto-industry-news/2026-bmw-ix3-can-do-up-to-800-km-400kw-maximum-charging.html", "published": null}
+      ]
+    },
+    {
+      "id": "bidirectional-charging",
+      "title": "Bidirectional charging moves from pilot to standard equipment",
+      "summary": "Reporting on the Neue Klasse iX3 describes vehicle-to-load, vehicle-to-home and vehicle-to-grid capability as standard. Home and grid use still depends on compatible wallboxes, tariffs and local grid rules.",
+      "categories": ["C02"],
+      "horizon": "next",
+      "markets": ["Europe", "US"],
+      "powertrains": ["BEV"],
+      "features": ["Bidirectional charging", "Wallbox, charging / home charging"],
+      "sources": [
+        {"title": "BMW kicks off 'Neue Klasse' era with debut of iX3", "publisher": "International Fleet World", "url": "https://internationalfleetworld.com/bmw-kicks-off-neue-klasse-era-with-debut-of-ix3/", "published": null},
+        {"title": "The new BMW iX3 is here to take on the EV world", "publisher": "TimesLIVE", "url": "https://www.timeslive.co.za/motoring/new-models/2025-09-05-the-new-bmw-ix3-is-here-to-take-on-the-ev-world/", "published": "2025-09-05"}
+      ]
+    },
+    {
+      "id": "next-generation-batteries",
+      "title": "Semi-solid and sodium-ion cells arrive before full solid-state",
+      "summary": "Most manufacturers place first all-solid-state vehicles around 2027 to 2028 and broad production towards 2030. Semi-solid packs are already in some Chinese cars and a sodium-ion passenger car was announced for 2026. Timelines differ by source and several come from suppliers.",
+      "categories": ["C02"],
+      "horizon": "later",
+      "markets": ["China", "Global"],
+      "powertrains": ["BEV"],
+      "features": ["High voltage battery", "Electric Range"],
+      "sources": [
+        {"title": "China ignites solid-state battery race: production expands in 2026, vehicle demonstrations by 2027", "publisher": "CarNewsChina", "url": "https://carnewschina.com/2026/02/16/china-ignites-solid-state-battery-race-production-expands-in-2026-vehicle-demonstrations-by-2027/", "published": "2026-02-16"},
+        {"title": "What's next for EV batteries in 2026", "publisher": "MIT Technology Review", "url": "https://technologyreview.com/2026/02/02/1132042/whats-next-for-ev-batteries-in-2026", "published": "2026-02-02"},
+        {"title": "Solid & Soon: Production Timelines for 14 Upcoming Solid-State Batteries", "publisher": "Battery Technology", "url": "https://www.batterytechonline.com/market-analysis/production-timelines-for-14-upcoming-solid-state-batteries", "published": null}
+      ]
+    },
+    {
+      "id": "plug-in-hybrid-resurgence",
+      "title": "Plug-in hybrids and range extenders regain ground",
+      "summary": "Forecasters cut 2026 battery-electric share and expect plug-in hybrid ownership to grow strongly, with US demand weakened by the withdrawal of incentives while European battery-electric registrations reach record share. Forecast totals differ between agencies.",
+      "categories": ["C02", "C01"],
+      "horizon": "now",
+      "markets": ["US", "Europe", "China"],
+      "powertrains": ["PHEV", "BEV"],
+      "features": ["Electric Range"],
+      "sources": [
+        {"title": "Electric Vehicle Outlook", "publisher": "BloombergNEF", "url": "https://about.bnef.com/electric-vehicle-outlook/", "published": null},
+        {"title": "Global EV sales reached 1.2 million units in the opening month of 2026", "publisher": "Benchmark Source", "url": "https://source.benchmarkminerals.com/article/global-ev-sales-reached-1-2-million-units-in-the-opening-month-of-2026", "published": null},
+        {"title": "Global EV fleet to hit 116m in 2026", "publisher": "The Daily Star", "url": "https://www.thedailystar.net/business/global-economy/news/global-ev-fleet-hit-116m-2026-4058611", "published": null}
+      ]
+    },
+    {
+      "id": "eu-2035-target-revision",
+      "title": "The EU proposes to soften its 2035 zero-emission target",
+      "summary": "In December 2025 the European Commission proposed replacing the 2035 zero-emission requirement with a 90% CO2 cut, which would keep plug-in hybrids and range extenders on sale. The proposal still needed approval by EU governments and Parliament; its 2026 status was not confirmed in the sources found.",
+      "categories": ["C02"],
+      "horizon": "next",
+      "markets": ["Europe"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": [],
+      "sources": [
+        {"title": "The EU Is Officially Dropping Its 2035 Combustion Engine Ban", "publisher": "Motor1", "url": "https://www.motor1.com/news/782012/eu-dropping-combustion-engine-ban-2035/", "published": null},
+        {"title": "EU drops 2035 combustion engine ban in victory for its carmakers", "publisher": "South China Morning Post", "url": "https://www.scmp.com/news/world/europe/article/3336682/eu-drops-2035-combustion-engine-ban-victory-carmakers", "published": null}
+      ]
+    },
+    {
+      "id": "nacs-charging-port",
+      "title": "NACS becomes the North American charging port",
+      "summary": "Most manufacturers selling electric cars in North America have committed to the SAE J3400 connector. BMW reported building a native port into every new i5 from March 2026 production and confirmed it for Neue Klasse models; earlier cars need an adapter.",
+      "categories": ["C02"],
+      "horizon": "now",
+      "markets": ["US"],
+      "powertrains": ["BEV"],
+      "features": ["Public charging / external providers", "High-voltage charging power socket"],
+      "sources": [
+        {"title": "The First BMW With A NACS Charge Port Is Already Here, And It's Not The iX3 Or i3", "publisher": "InsideEVs", "url": "https://insideevs.com/news/790773/first-bmw-nacs-port-us-2026/", "published": null},
+        {"title": "2026 BMW i5 NACS charging port and Supercharger update", "publisher": "BMW Blog", "url": "https://www.bmwblog.com/2026/03/27/2026-bmw-i5-nacs-charging-port-supercharger-update/", "published": "2026-03-27"},
+        {"title": "NACS charging in 2026: a practical guide for EV drivers", "publisher": "GreenCars", "url": "https://www.greencars.com/news/nacs-charging-in-2026-a-practical-guide-for-ev-drivers", "published": null}
+      ]
+    },
+    {
+      "id": "level-3-retreat",
+      "title": "Level 3 retreats; hands-off Level 2+ becomes the premium offer",
+      "summary": "Reports say BMW is discontinuing Personal Pilot L3 with the 7 Series facelift in favour of a hands-off motorway assistant up to 130 km/h, and that Mercedes dropped Drive Pilot from the 2026 S-Class. Cited reasons are sensor cost, narrow operating limits and low uptake; sources differ on how far Mercedes has withdrawn.",
+      "categories": ["C09"],
+      "horizon": "now",
+      "markets": ["Europe", "US"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Highway assistant", "Driver assistance, automated driving, overall technology", "(Active) cruise control", "Steering and lane guide assist"],
+      "sources": [
+        {"title": "BMW drops Level 3 ADAS as industry backing ebbs away", "publisher": "Automotive World", "url": "https://www.automotiveworld.com/news/bmw-drops-level-3-adas-as-industry-backing-ebbs-away/", "published": null},
+        {"title": "Mercedes-Benz upgrades ADAS for the 2026 S-Class", "publisher": "Automotive World", "url": "https://www.automotiveworld.com/analysis/mercedes-benz-upgrades-adas-for-the-2026-s-class/", "published": null}
+      ]
+    },
+    {
+      "id": "china-urban-noa",
+      "title": "Urban navigate-on-autopilot goes mass-market in China under new mandatory rules",
+      "summary": "Urban navigation assistance reached about 15% of Chinese passenger-car sales in 2025, mostly in cars under RMB 300,000 and mostly from domestic brands. China's first mandatory Level 2 safety standard takes effect on 1 January 2027 and bars non-compliant models from sale.",
+      "categories": ["C09"],
+      "horizon": "now",
+      "markets": ["China"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Driver assistance, automated driving, overall technology", "Highway assistant", "Lane Change Assistant"],
+      "sources": [
+        {"title": "China Issues First Mandatory National Standard for L2 Combined Driving Assistance, Effective January", "publisher": "Gasgoo", "url": "https://autonews.gasgoo.com/articles/icv/china-issues-first-mandatory-national-standard-for-l2-combined-driving-assistance-effective-january-2075588167955427329", "published": null},
+        {"title": "BYD reaffirms full-line rollout of God's Eye ADAS", "publisher": "CarNewsChina", "url": "https://carnewschina.com/2025/12/30/byd-reaffirms-full-line-rollout-of-gods-eye-adas-leveraging-massive-data-and-engineering-scale", "published": "2025-12-30"},
+        {"title": "Growth in China passenger vehicle navigation on autopilot market", "publisher": "Frost & Sullivan", "url": "https://www.frost.com/growth-opportunity-news/mobility-automotive-transportation/digital-software/growth-in-china-passenger-vehicle-navigation-on-autopilot-noa-market-to-hinge-on-delivery-of-scalable-safe-and-commercially-sustainable-urban-autonomy-experiences/", "published": null}
+      ]
+    },
+    {
+      "id": "generative-ai-assistant",
+      "title": "Generative AI voice assistants replace scripted voice commands",
+      "summary": "BMW is building its Intelligent Personal Assistant on Amazon's Alexa+ starting with the 2026 iX3, General Motors and Polestar are rolling out Google Gemini, and Volkswagen and Stellantis use other language-model assistants. Launch markets and dates come from manufacturer announcements.",
+      "categories": ["C07"],
+      "horizon": "now",
+      "markets": ["US", "Europe"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Intelligent Personal Assistant", "Voice control / speech recognition", "Intelligent Personal Assistant, activation word"],
+      "sources": [
+        {"title": "I just tested Alexa+ inside the new BMW iX3 at CES 2026", "publisher": "Tom's Guide", "url": "https://www.tomsguide.com/vehicle-tech/i-just-tested-alexa-inside-the-new-bmw-ix3-at-ces-2026-and-its-the-first-in-car-ai-that-actually-feels-human", "published": null},
+        {"title": "Hands-on: Amazon Alexa+ in the BMW iX3", "publisher": "MobileSyrup", "url": "https://mobilesyrup.com/2026/01/20/hands-on-amazon-alexa-bmw-ix3/", "published": "2026-01-20"},
+        {"title": "GM to integrate Google Gemini across all vehicles", "publisher": "Unite.AI", "url": "https://www.unite.ai/gm-to-integrate-google-gemini-across-all-vehicles", "published": null}
+      ]
+    },
+    {
+      "id": "physical-controls-return",
+      "title": "Physical controls return under Euro NCAP's 2026 protocols",
+      "summary": "Euro NCAP's 2026 protocols reward dedicated physical controls for frequently used functions such as indicators, hazard lights, wipers and the horn. Coverage differs on whether this is required for a top rating or only earns points; the protocol documents should be checked.",
+      "categories": ["C07", "C04"],
+      "horizon": "now",
+      "markets": ["Europe"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Touch screen, operation", "Operating concept, operating system", "Controller operation", "Multi-function steering wheel operation"],
+      "sources": [
+        {"title": "Euro NCAP: New 2026 protocols target distraction, impairment, and speeding", "publisher": "European Transport Safety Council", "url": "https://etsc.eu/euro-ncap-new-2026-protocols-target-distraction-impairment-and-speeding/", "published": null},
+        {"title": "Physical buttons beat touchscreens in Euro NCAP's new safety rules", "publisher": "Carwow", "url": "https://www.carwow.co.uk/news/9964/euro-ncap-2026-safety-rules", "published": null}
+      ]
+    },
+    {
+      "id": "driver-monitoring",
+      "title": "Continuous driver monitoring becomes a rating and regulatory requirement",
+      "summary": "Euro NCAP's 2026 protocols give more weight to continuous eye and head tracking, impairment detection and a safe stop for an unresponsive driver. China's mandatory Level 2 standard also requires driver monitoring from 2027.",
+      "categories": ["C04", "C09"],
+      "horizon": "now",
+      "markets": ["Europe", "China"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Interior camera", "Fatigue Alert"],
+      "sources": [
+        {"title": "Euro NCAP: New 2026 protocols target distraction, impairment, and speeding", "publisher": "European Transport Safety Council", "url": "https://etsc.eu/euro-ncap-new-2026-protocols-target-distraction-impairment-and-speeding/", "published": null},
+        {"title": "Huawei, BYD, Tesla-backed China L2 ADS standard takes effect", "publisher": "China EV Home", "url": "https://chinaevhome.com/2026/07/02/huawei-byd-tesla-backed-china-l2-ads-standard-takes-effect/", "published": "2026-07-02"}
+      ]
+    },
+    {
+      "id": "software-defined-vehicle",
+      "title": "Central computing and over-the-air updates become a baseline expectation",
+      "summary": "New architectures consolidate vehicle functions into a few central computers, and over-the-air updates are described as an expectation instead of a differentiator. Vendor-sponsored surveys report that many owners do not know whether their car can be updated and that privacy concerns are common.",
+      "categories": ["C07"],
+      "horizon": "now",
+      "markets": ["Global"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["ConnectedDrive and Infotainment, overall technology"],
+      "sources": [
+        {"title": "2025 SDV Survey: Automotive industry is betting on AI, OTA updates and advanced software though obstacles remain", "publisher": "Business Wire", "url": "https://businesswire.com/news/home/20250604953722/en/2025-SDV-Survey-Automotive-Industry-Is-Betting-on-AI-OTA-Updates-and-Advanced-Software-Though-Obstacles-Remain", "published": "2025-06-04"},
+        {"title": "Software-defined Vehicles: Built For Users, or For the Industry?", "publisher": "Edge AI and Vision Alliance", "url": "https://www.edge-ai-vision.com/2025/09/software-defined-vehicles-built-for-users-or-for-the-industry/", "published": null}
+      ]
+    },
+    {
+      "id": "feature-subscriptions",
+      "title": "Buyers resist subscriptions for hardware already in the car",
+      "summary": "A small Cox Automotive study found three quarters of buyers unwilling to pay recurring fees for features such as heated seats, while a larger S&P Global survey found more acceptance for connected services that add function. The two samples are not comparable and their dates were not confirmed.",
+      "categories": ["C03", "C07"],
+      "horizon": "now",
+      "markets": ["US", "Global"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Seating, ventilate / heat", "Heated steering wheel"],
+      "sources": [
+        {"title": "75 Percent of Car Buyers Don't Want Features Locked Behind Subscriptions", "publisher": "The Drive", "url": "https://thedrive.com/news/75-percent-of-car-buyers-dont-want-features-locked-behind-subscriptions", "published": null},
+        {"title": "What connected-car services are consumers willing to pay for?", "publisher": "S&P Global Mobility", "url": "https://www.spglobal.com/mobility/en/research-analysis/what-connectedcar-services-are-consumers-willing-to-pay-for.html", "published": null}
+      ]
+    },
+    {
+      "id": "panoramic-displays",
+      "title": "Pillar-to-pillar displays and windshield-wide head-up displays",
+      "summary": "Suppliers and manufacturers are moving information to full-width projections along the base of the windshield, including BMW's panoramic display for Neue Klasse models, alongside wide dashboard screens. Analysts describe these as premium differentiation, not yet a standard cockpit layout.",
+      "categories": ["C07", "C08"],
+      "horizon": "next",
+      "markets": ["Global"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Head-Up Display", "Instrument cluster"],
+      "sources": [
+        {"title": "BMW reveals new wall-to-wall head-up display", "publisher": "Kelley Blue Book", "url": "https://www.kbb.com/car-news/bmw-reveals-new-wall-to-wall-head-up-display/", "published": null},
+        {"title": "Scenic View head-up display", "publisher": "Continental", "url": "https://continental.com/en/products-and-innovation/innovation/scenic-view-hud", "published": null},
+        {"title": "Pillar-to-Pillar Displays", "publisher": "ABI Research", "url": "https://www.abiresearch.com/market-research/product/7787365-pillar-to-pillar-displays", "published": null}
+      ]
+    },
+    {
+      "id": "in-car-entertainment",
+      "title": "Gaming and streaming move into the cockpit",
+      "summary": "Manufacturers are adding game platforms and video or sports streaming to centre and passenger displays, usually limited to when the car is parked. Evidence is mainly manufacturer announcements from 2022 to 2025.",
+      "categories": ["C07"],
+      "horizon": "now",
+      "markets": ["Global"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Rear seat entertainment", "Apps (in-car)"],
+      "sources": [
+        {"title": "From gaming to live sports: Audi redefines in-car entertainment", "publisher": "Audi MediaCenter", "url": "https://www.audi-mediacenter.com/en/presskits/from-gaming-to-live-sports-audi-redefines-in-car-entertainment-16736", "published": null},
+        {"title": "In-car gaming coming to Volkswagen fleet", "publisher": "Electronics360", "url": "https://electronics360.globalspec.com/article/21438/in-car-gaming-coming-to-volkswagen-fleet", "published": null}
+      ]
+    },
+    {
+      "id": "steer-by-wire",
+      "title": "Steer-by-wire enters premium series production",
+      "summary": "Mercedes-Benz announced steer-by-wire for production cars from 2026 using a ZF system already fitted to the Nio ET9, removing the mechanical link to the front wheels. The sources date from the announcement and do not confirm which models have launched.",
+      "categories": ["C04"],
+      "horizon": "next",
+      "markets": ["Europe", "China"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Steering", "Steering wheel"],
+      "sources": [
+        {"title": "Mercedes steer-by-wire confirmed for 2026", "publisher": "Motor1", "url": "https://www.motor1.com/news/757388/mercedes-steer-by-wire-confirmed-for-2026/", "published": null},
+        {"title": "Mercedes-Benz unveils steer-by-wire system", "publisher": "Automotive Dive", "url": "https://www.automotivedive.com/news/mercedes-benz-unveils-steer-by-wire-system/746535", "published": null}
+      ]
+    },
+    {
+      "id": "digital-key",
+      "title": "Phone-as-key with ultra-wideband spreads beyond luxury cars",
+      "summary": "A Car Connectivity Consortium report cited in the press says 115 vehicles received Digital Key certification in 2025, and more brands are adding wallet-based keys in 2026. Some manufacturers tie the feature to a paid connected-services subscription.",
+      "categories": ["C05"],
+      "horizon": "now",
+      "markets": ["US", "Europe", "China"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": ["Digital Key", "Comfort Access", "Vehicle, lock / unlock"],
+      "sources": [
+        {"title": "Why There's Simply No Need For Physical Car Keys Anymore", "publisher": "BGR", "url": "https://www.bgr.com/2088990/why-no-one-needs-car-keys-anymore/", "published": null},
+        {"title": "BMW announces BMW Digital Key Plus with Ultra-Wideband technology coming to the BMW iX", "publisher": "BMW Group PressClub", "url": "https://www.press.bmwgroup.com/global/article/detail/T0324128EN/bmw-announces-bmw-digital-key-plus-with-ultra-wideband-technology-coming-to-the-bmw-ix", "published": null}
+      ]
+    },
+    {
+      "id": "battery-passport",
+      "title": "EU battery passport becomes mandatory in February 2027",
+      "summary": "From 18 February 2027 electric-vehicle batteries placed on the EU market need a digital passport disclosing material origins, recycled content and carbon footprint. Specific recycled-content quotas were not confirmed in the sources found.",
+      "categories": ["C02"],
+      "horizon": "next",
+      "markets": ["Europe"],
+      "powertrains": ["BEV", "PHEV"],
+      "features": [],
+      "sources": [
+        {"title": "The EU Battery Passport Explained: Requirements, Timeline and Compliance Steps for Automotive", "publisher": "Automotive IQ", "url": "https://www.automotive-iq.com/electrics-electronics/articles/eu-battery-passport-explained-requirements-timeline-and-compliance-steps-to-2027", "published": null},
+        {"title": "Electric vehicles will need battery passports to enter EU from 2027", "publisher": "Circulor", "url": "https://circulor.com/articles/electric-vehicles-will-need-battery-passports-to-enter-eu-from-2027", "published": null}
+      ]
+    },
+    {
+      "id": "china-premium-price-pressure",
+      "title": "Chinese brands put German premium pricing under pressure",
+      "summary": "Reports show BMW, Mercedes-Benz and Audi deliveries in China falling in 2025 and early 2026, with BMW revising recommended prices on more than 30 models, while Chinese brands roughly doubled European sales in the first half of 2026. Share figures vary by segment and period.",
+      "categories": ["C03"],
+      "horizon": "now",
+      "markets": ["China", "Europe"],
+      "powertrains": ["ICE", "PHEV", "BEV"],
+      "features": [],
+      "sources": [
+        {"title": "Prestige cracks: BMW, Benz, Audi slash prices as China's luxury market turns local", "publisher": "CarNewsChina", "url": "https://carnewschina.com/2026/02/13/prestige-cracks-bmw-benz-audi-slash-prices-as-chinas-luxury-market-turns-local/", "published": "2026-02-13"},
+        {"title": "German premium brands adjust pricing strategies in China", "publisher": "New Mobility News", "url": "https://newmobility.news/2026/02/16/german-premium-brands-adjust-pricing-strategies-in-china/", "published": "2026-02-16"}
+      ]
+    }
+  ]
+}
