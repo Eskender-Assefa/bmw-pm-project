@@ -6,6 +6,7 @@ import { Box, RotateCcw, ArrowUpRight, Layers3, Search, ArrowDownUp } from 'luci
 import { api, useApi, cohortQuery, type Cohort, type Ranking, type RequirementView } from '@/lib/api';
 import type { components } from '@/lib/api-types';
 import { COMPONENTS, PRIORITY_COLORS, componentForRequirement, componentPriorities, approvedConcepts, DESIGN_CONCEPTS, type ComponentId, type Concept, type CameraView } from '@/lib/vehicle-priority';
+import { SketchfabG60 } from './sketchfab-g60';
 import { sortRequirements, type RequirementSort } from '@/lib/requirement-ranking';
 const VehicleScene=dynamic(()=>import('./vehicle-scene'),{ssr:false,loading:()=> <div className="vehicle-canvas vehicle-loading">Loading interactive G60…</div>});
 type Target=components['schemas']['TargetResult'];
@@ -23,6 +24,7 @@ function VehicleWorkspace({requirements,categories,cohort,focused,onReview,onCon
   const [query,setQuery]=useState(''),[category,setCategory]=useState(''),[band,setBand]=useState('all'),[status,setStatus]=useState('all');
   const [sort,setSort]=useState<RequirementSort>('priority'),[descending,setDescending]=useState(true),[selectedId,setSelectedId]=useState('');
   const [opacity,setOpacity]=useState(.2),[view,setView]=useState<CameraView>('exterior'),[reset,setReset]=useState(0),[showBaseline,setShowBaseline]=useState(false),[manualConcept,setManualConcept]=useState<Concept|null>(null);
+  const [modelView,setModelView]=useState<'reference'|'interactive'>(compact?'interactive':'reference');
   const cameraIntent=useRef(0);
   const [allowLive,setAllowLive]=useState(true);
   const [mapping,setMapping]=useState<{id:string;target:Target}|null>(null),[mappingBusy,setMappingBusy]=useState(false);
@@ -54,14 +56,16 @@ function VehicleWorkspace({requirements,categories,cohort,focused,onReview,onCon
   // Selecting another cohort or revision invalidates both the mapping and any in-flight response.
   },[selected?.id,selected?.revision,cohortKey,allowLive]);
   useEffect(()=>onConceptChange?.(concept),[concept,onConceptChange]);
-  const selectRequirement=(id:string)=>{setSelectedId(id);setManualConcept(null);setShowBaseline(false);setReset(n=>n+1);};
-  const preview=(next:Concept)=>{cameraIntent.current++;setManualConcept(next);setShowBaseline(false);setView('cabin');setReset(n=>n+1);};
+  const selectRequirement=(id:string)=>{setModelView('interactive');setSelectedId(id);setManualConcept(null);setShowBaseline(false);setReset(n=>n+1);};
+  const preview=(next:Concept)=>{setModelView('interactive');cameraIntent.current++;setManualConcept(next);setShowBaseline(false);setView('cabin');setReset(n=>n+1);};
   const filterChanged=()=>{setSelectedId('');setManualConcept(null);setShowBaseline(false);};
   const highlights=manualConcept&&manualConcept!=='baseline'?[manualConcept]:parts;
   return <section className={'panel vehicle-panel'+(compact?' vehicle-compact':'')} aria-label="G60 3D component priorities">
     <div className="panel-heading"><div><div className="vehicle-eyebrow"><Box size={13}/> PRIORITY EXPLORER</div><h2>Highest-priority improvements, in view.</h2><p>Select a customer need. The car finds the part and previews the change.</p></div><span className="badge badge-blue">G60 · 3D demo</span></div>
     {applied.length>0&&<div className="vehicle-applied"><strong>{applied.length} accepted design{applied.length>1?'s':''} on this G60</strong><span>{applied.map(id=>DESIGN_CONCEPTS[id].title).join(' · ')} · Saved with PM decisions</span></div>}
-    <div className="vehicle-layout"><div className={'vehicle-visual'+(impact&&!showBaseline?' vehicle-impact-active':'')}>
+    <div className="vehicle-layout"><div className={'vehicle-visual'+(modelView==='interactive'&&impact&&!showBaseline?' vehicle-impact-active':'')}>
+      <div className="vehicle-model-switch" role="group" aria-label="Vehicle model view"><button aria-pressed={modelView==='reference'} onClick={()=>setModelView('reference')}>BMW G60 model</button><button aria-pressed={modelView==='interactive'} onClick={()=>setModelView('interactive')}>Interactive improvements</button></div>
+      {modelView==='reference'?<SketchfabG60 onPreview={()=>setModelView('interactive')}/>:<>
       <div className="vehicle-viewbar" role="group" aria-label="Model camera">{(['exterior','cabin','top','side'] as CameraView[]).map(id=><button key={id} aria-pressed={view===id} onClick={()=>{cameraIntent.current++;setView(id);setReset(n=>n+1);}}>{id==='exterior'?'Whole car':id==='cabin'?'Cabin':id==='top'?'Top':'Side'}</button>)}<button className="vehicle-reset" aria-label="Reset 3D model" onClick={()=>{cameraIntent.current++;setShowBaseline(true);setManualConcept(null);setView('exterior');setOpacity(.2);setReset(n=>n+1);}}><RotateCcw size={13}/>Reset</button></div>
       <div className="vehicle-stage"><VehicleScene applied={showBaseline?[]:applied} priorities={priorities} selected={highlights[0]||null} highlighted={highlights} concept={showBaseline?'baseline':concept} opacity={opacity} view={view} reset={reset} onSelect={id=>{const match=rows.find(r=>componentForRequirement(r)===id);if(match)selectRequirement(match.id);}}/>
       {selected&&<div className="vehicle-focus-caption"><span className={highlights.length?'vehicle-focus-dot':''}/>{highlights.length?`LOCATED · ${highlights.map(id=>COMPONENTS[id]).join(' + ')}`:'NO SUPPORTED PART IDENTIFIED'}</div>}</div>
@@ -70,6 +74,7 @@ function VehicleWorkspace({requirements,categories,cohort,focused,onReview,onCon
       <div className="vehicle-legend" aria-label="Priority legend"><span><i style={{background:PRIORITY_COLORS.High}}/>Critical review / High</span><span><i style={{background:PRIORITY_COLORS.Medium}}/>Medium</span><span><i style={{background:PRIORITY_COLORS.Low}}/>Low</span><span><i style={{background:PRIORITY_COLORS.Unscored}}/>Unscored</span></div>
       <label className="vehicle-opacity"><Layers3 size={14}/>Body opacity<input aria-label="Body opacity" type="range" min="5" max="45" value={Math.round(opacity*100)} onChange={e=>setOpacity(Number(e.target.value)/100)}/><span>{Math.round(opacity*100)}%</span></label>
       {selected&&<div className="vehicle-mapping-note"><strong>{mappingBusy?'Locating the physical part…':target?.method==='ai'?'AI part suggestion':'Local part matching'}</strong><p>{target?.notice||'Matches the wording independently of the ten categories.'} {target?.reason}</p><label className="vehicle-ai-toggle"><input type="checkbox" checked={allowLive} onChange={e=>setAllowLive(e.target.checked)}/>Use AI to identify parts</label><p className="vehicle-ai-disclosure">Sends this requirement and up to 3 supporting comments to the configured OpenAI API.</p>{target?.supporting_quote&&<details><summary>Why this part?</summary><blockquote>{target.supporting_quote}</blockquote></details>}</div>}
+      </>}
     </div><div className="vehicle-inspector">
       {!compact&&<><div className="vehicle-queue-heading"><span>RANKED IMPROVEMENTS</span><strong>{rows.length} customer needs</strong></div>
       <div className="vehicle-queue-filters"><label className="vehicle-search"><Search size={14}/><input aria-label="Search ranked improvements" placeholder="Search customer needs…" value={query} onChange={e=>{setQuery(e.target.value);filterChanged();}}/></label>

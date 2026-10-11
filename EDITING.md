@@ -12,3 +12,5 @@ The React dashboard is also available at `/cockpit`. Edit `src/components/cockpi
 The 3D controls are in `src/components/vehicle-preview.tsx`, the Three.js scene in `src/components/vehicle-scene.tsx`, and editable geometry in `src/lib/g60-geometry.ts`. Feature mappings and colour rules are in `src/lib/vehicle-priority.ts`. Try buttons are temporary visual previews. The approval dialog can save a chosen design with the PM decision; accepted designs restore after reload. See `docs/G60_3D.md` and `docs/RAG_INTEGRATION.md` for extension points.
 
 This copy has its own dependencies, source documents and SQLite database in `.local/cockpit.sqlite`. The original project remains in the parent folder.
+
+The user-supplied Sketchfab reference is embedded by `src/components/sketchfab-g60.tsx`. Overview starts with this reference; selecting a ranked need opens the editable schematic automatically. Reference and interactive views share selection state, but geometry changes only affect the local schematic.

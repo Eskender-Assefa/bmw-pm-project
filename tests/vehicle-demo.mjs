@@ -60,11 +60,21 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   const page=await browser.newPage({viewport:{width:1500,height:1100}});page.setDefaultTimeout(30000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const writes=[];page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('/decisions'))writes.push(r.url());});
+  // External asset availability is checked separately; exercise the local fallback deterministically.
+  await page.route('https://sketchfab.com/models/**/embed',route=>route.fulfill({contentType:'text/html',body:'<p>Hosted viewer unavailable in this test.</p>'}));
   await page.route('**/api/v1/**',async route=>{const url=new URL(route.request().url());const response=await route.fetch({url:apiUrl+url.pathname+url.search});await route.fulfill({response});});
   await page.goto('http://127.0.0.1:3001/',{waitUntil:'domcontentloaded'});
   const tabs=page.locator('.sidebar nav .nav-item');
   assert.deepEqual(await tabs.allTextContents(),['Overview','Requirements','Evidence library','Comparisons','Decisions & audit']);
   const panel=page.getByRole('region',{name:'G60 3D component priorities'});
+  assert.equal(await panel.locator('iframe').getAttribute('src'),'https://sketchfab.com/models/ee328c2302494193a05cb4949b17ae55/embed');
+  assert.equal(await panel.getByRole('link',{name:'SLGA',exact:true}).getAttribute('href'),'https://sketchfab.com/csperamune');
+  await panel.getByRole('group',{name:'Ranked improvements',exact:true}).getByRole('button').first().click();
+  await panel.locator('[data-rendered=true]').waitFor();
+  assert.equal(await panel.locator('iframe').count(),0,'Selecting a need switches away from the remote viewer');
+  await panel.getByRole('button',{name:'BMW G60 model',exact:true}).click();
+  await panel.locator('iframe').waitFor();
+  await panel.getByRole('button',{name:'Preview selected improvement',exact:true}).click();
   await panel.locator('[data-rendered=true]').waitFor();
   await panel.screenshot({path:path.join(output,'baseline.png')});
   assert.equal(await panel.getByLabel('Car component',{exact:true}).count(),0,'No component picker required');
@@ -108,6 +118,7 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   await page.getByText('3D preview available for G60').waitFor();
   assert.equal(await page.locator('.vehicle-canvas canvas').count(),0);
   await page.getByLabel('Model',{exact:true}).selectOption('G60');
+  await page.getByRole('button',{name:'Interactive improvements',exact:true}).click();
   await page.locator('[data-rendered=true]').waitFor();
   await page.setViewportSize({width:390,height:844});
   await page.getByRole('region',{name:'G60 3D component priorities'}).screenshot({path:path.join(output,'mobile.png')});
@@ -128,8 +139,10 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   await acceptedDrawer.locator('[data-applied=screen][data-rendered=true]').waitFor();
   await page.keyboard.press('Escape');
   await page.getByRole('button',{name:'Overview',exact:true}).click();
+  await page.getByRole('button',{name:'Interactive improvements',exact:true}).click();
   await page.locator('[data-applied=screen][data-rendered=true]').waitFor();
   await page.reload();
+  await page.getByRole('button',{name:'Interactive improvements',exact:true}).click();
   await page.locator('[data-applied=screen][data-rendered=true]').waitFor();
   const accepted=page.getByRole('region',{name:'G60 3D component priorities'});
   await accepted.getByRole('button',{name:'Cabin',exact:true}).click();
@@ -141,5 +154,5 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   await accepted.locator('[data-applied=screen]').waitFor();
   assert.equal(writes.length,1,'Only the explicit approval saves to the disposable database');
   assert.deepEqual(errors,[],'No browser JavaScript errors');
-  console.log('Passed unchanged tabs, WebGL, amplified concepts, comparison/reset, requirement focus, mobile layout, and explicit approval persistence after reload in a disposable database.');
+  console.log('Passed Sketchfab embed/attribution and automatic interactive fallback, unchanged tabs, WebGL, amplified concepts, comparison/reset, requirement focus, mobile layout, and explicit approval persistence after reload in a disposable database.');
 } finally {await browser?.close();backend.kill('SIGTERM');}
