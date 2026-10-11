@@ -8,7 +8,8 @@ export type Job = components['schemas']['JobView'];
 export type DecisionInput = components['schemas']['DecisionRequest'];
 export type Proposal = components['schemas']['AnalysisProposal'];
 export async function api<T>(path:string,body?:unknown,signal?:AbortSignal):Promise<T>{
- const response=await fetch('/api/v1'+path,{method:body===undefined?'GET':'POST',headers:body===undefined?undefined:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal});
+ const multipart=body instanceof FormData;
+ const response=await fetch('/api/v1'+path,{method:body===undefined?'GET':'POST',headers:body===undefined||multipart?undefined:{'Content-Type':'application/json'},body:body===undefined?undefined:multipart?body:JSON.stringify(body),signal});
  if(!response.ok){let message='Request failed';try{const data=await response.json();message=typeof data.detail==='string'?data.detail:JSON.stringify(data.detail);}catch{}throw new Error(message);}
  return response.json();
 }

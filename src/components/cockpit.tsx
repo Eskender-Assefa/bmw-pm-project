@@ -1,18 +1,21 @@
 'use client';
 import { useState, type ReactNode } from 'react';
-import { LayoutDashboard, ListChecks, Files, Columns3, History, ArrowUpRight, ArrowRight, ChevronRight, ChevronsUpDown, Download, Plus, Search, ShieldCheck, AlertTriangle, CircleHelp, Database, Radio, Check, LoaderCircle, X, RefreshCw, SlidersHorizontal, Users, Sparkles, FileCheck2, ExternalLink, BookOpen, Activity } from 'lucide-react';
+import { LayoutDashboard, ListChecks, Files, Columns3, History, ArrowUpRight, ArrowRight, ChevronRight, ChevronsUpDown, Download, Plus, Search, ShieldCheck, AlertTriangle, CircleHelp, Database, Radio, Check, LoaderCircle, X, RefreshCw, SlidersHorizontal, Users, Sparkles, FileCheck2, ExternalLink, BookOpen, Activity, MessageSquareText } from 'lucide-react';
 import { Button } from './ui/button';
 import { Modal } from './ui/dialog';
 import { api, useApi, cohortQuery, number, date, type Cohort, type RequirementView, type Ranking, type Job } from '@/lib/api';
 import { RequirementDrawer, EvidenceModal } from './review';
 import { EvidenceWorkspace, ComparisonView, DecisionsView } from './workspaces';
+import { DocumentRag } from './document-rag';
+import { ReviewsComments } from './reviews-comments';
 
-type View='overview'|'requirements'|'evidence'|'comparisons'|'decisions';
+type View='overview'|'requirements'|'evidence'|'comparisons'|'decisions'|'rag'|'reviews';
 export type Notify=(message:string,tone?:'success'|'error')=>void;
 export type RunJob=(path:string,payload:unknown,onDone?:(result:Record<string,unknown>)=>void)=>Promise<void>;
 export interface Meta {categories:Record<string,string>;countries:string[];models:{id:string;name:string}[];feedback_counts:Record<string,number>;facts_pending:number;}
 interface Overview {denominator:number;mapped_records:number;reviewed_mapping_records:number;mapping_coverage:number|null;requirements:number;critical:number;approved:number;sources:number;tagged_rows:number;total_feedback:number;category_counts:{category:string;name:string;requirements:number;mentions:number}[];top_requirements:RequirementView[];evaluation:{status:string};}
-const views:{id:View;label:string;icon:typeof LayoutDashboard}[]=[{id:'overview',label:'Overview',icon:LayoutDashboard},{id:'requirements',label:'Requirements',icon:ListChecks},{id:'evidence',label:'Evidence library',icon:Files},{id:'comparisons',label:'Comparisons',icon:Columns3},{id:'decisions',label:'Decisions & audit',icon:History}];
+const views:{id:View;label:string;icon:typeof LayoutDashboard}[]=[{id:'overview',label:'Overview',icon:LayoutDashboard},{id:'requirements',label:'Requirements',icon:ListChecks},{id:'evidence',label:'Evidence library',icon:Files},{id:'comparisons',label:'Comparisons',icon:Columns3},{id:'decisions',label:'Decisions & audit',icon:History},{id:'reviews',label:'Reviews & Comments',icon:MessageSquareText}];
+views.splice(3,0,{id:'rag',label:'Document intelligence',icon:BookOpen});
 export function Badge({children,tone='neutral'}:{children:ReactNode;tone?:string}){return <span className={'badge badge-'+tone}>{children}</span>;}
 export function Empty({title,description,children}:{title:string;description?:string;children?:ReactNode}){return <div className="empty"><Database size={29}/><h3>{title}</h3>{description&&<p>{description}</p>}{children}</div>;}
 export function Loading(){return <div className="loading"><LoaderCircle className="spin" size={20}/> Loading evidence…</div>;}
@@ -27,7 +30,7 @@ export function Cockpit(){
  const notify:Notify=(text,tone='success')=>{setToast({text,tone});setTimeout(()=>setToast(null),7000);};
  const runJob:RunJob=async(path,payload,onDone)=>{
   setBusy(true);let last:Job|null=null;
-  try{last=await api<Job>(path,payload);setJob(last);while(last.state==='queued'||last.state==='running'){await new Promise(resolve=>setTimeout(resolve,800));last=await api<Job>('/jobs/'+last.id);setJob(last);}if(last.state!=='succeeded')throw new Error(last.error||'Job interrupted.');notify(last.kind==='export'?'Executive deck ready.':last.kind==='analysis'?'Analysis ready for review.':last.kind==='web_connector'?'Web evidence connected.':'Source import complete.');refresh();onDone?.(last.result as Record<string,unknown>);}
+  try{last=await api<Job>(path,payload);setJob(last);while(last.state==='queued'||last.state==='running'){await new Promise(resolve=>setTimeout(resolve,800));last=await api<Job>('/jobs/'+last.id);setJob(last);}if(last.state!=='succeeded')throw new Error(last.error||'Job interrupted.');notify(last.kind.startsWith('rag_')?'Document operation finished. Review the results.':last.kind==='export'?'Executive deck ready.':last.kind==='analysis'?'Analysis ready for review.':last.kind==='web_connector'?'Web evidence connected.':'Source import complete.');refresh();onDone?.(last.result as Record<string,unknown>);}
   catch(e){notify((e as Error).message,'error');refresh();}finally{setBusy(false);}
  };
  const exportDeck=()=>runJob('/exports',{cohort,include_scenario:true},result=>{window.location.href=result.download_url as string;});
@@ -40,7 +43,7 @@ export function Cockpit(){
    <div className="sidebar-bottom"><span className="green-dot"/><div>Local workspace<small>Replay mode · C01–C10 v2</small></div><CircleHelp size={17}/></div>
   </aside>
   <div className="main-shell"><header className="topbar"><div className="breadcrumbs">Workspace<ChevronRight size={14}/><span>{views.find(v=>v.id===view)?.label}</span></div><div className="topbar-right"><span className="local-tag"><span className="green-dot"/> Local demo</span><span className="top-divider"/><div className="avatar">PM</div><div className="reviewer">Demo PM<small>Product manager</small></div></div></header>
-   <main><div className="page-heading"><div><div className="eyebrow">PRODUCT PLANNING</div><h1>{view==='overview'?'Your product, in focus.':view==='requirements'?'Customer requirements':view==='evidence'?'Evidence library':view==='comparisons'?'Compare with context':'Decisions & audit'}</h1><p>{view==='overview'?'Understand customer needs. Review the evidence behind your next product decision.':view==='requirements'?'Prioritize distinct customer needs, with the source and uncertainty always in view.':view==='evidence'?'Original sources, exact locations, and reviewable product facts.':view==='comparisons'?'Compatible evidence and clearly labeled assumptions, side by side.':'A persistent record of what changed, who reviewed it, and why.'}</p></div><div className="heading-actions"><Button variant="outline" onClick={()=>{setWebModel(cohort.model||'G60');setWebCountry(cohort.country==='all'?'US':cohort.country);setWebOpen(true);}}><Radio size={16}/>Connect web evidence</Button><Button variant="outline" onClick={()=>setImportOpen(true)}><Plus size={16}/>Import sources</Button><Button onClick={exportDeck} disabled={busy}><Download size={16}/>Export board deck</Button></div></div>
+   <main className={view==='reviews'?'reviews-page':undefined}><div className="page-heading"><div><div className="eyebrow">PRODUCT PLANNING</div><h1>{view==='overview'?'Your product, in focus.':view==='requirements'?'Customer requirements':view==='evidence'?'Evidence library':view==='comparisons'?'Compare with context':view==='reviews'?'Reviews & Comments':view==='rag'?'Document intelligence':'Decisions & audit'}</h1><p>{view==='overview'?'Understand customer needs. Review the evidence behind your next product decision.':view==='requirements'?'Prioritize distinct customer needs, with the source and uncertainty always in view.':view==='evidence'?'Original sources, exact locations, and reviewable product facts.':view==='comparisons'?'Compatible evidence and clearly labeled assumptions, side by side.':view==='reviews'?'Explore customer voices, review their context, and trace every comment to its source.':view==='rag'?'Explore documents and review their evidence mappings.':'A persistent record of what changed, who reviewed it, and why.'}</p></div><div className="heading-actions"><Button variant="outline" onClick={()=>{setWebModel(cohort.model||'G60');setWebCountry(cohort.country==='all'?'US':cohort.country);setWebOpen(true);}}><Radio size={16}/>Connect web evidence</Button><Button variant="outline" onClick={()=>setImportOpen(true)}><Plus size={16}/>Import sources</Button><Button onClick={exportDeck} disabled={busy}><Download size={16}/>Export board deck</Button></div></div>
    <section className="context-bar" aria-label="Evidence cohort"><div className="vehicle-context"><div className="vehicle-code">{cohort.model}</div><div><strong>BMW {selectedName}</strong><small>Customer evidence cohort</small></div></div><div className="filter-controls">
     <Filter label="Model" value={cohort.model||'G60'} onChange={model=>{setCohort({...cohort,model:model as Cohort['model']});setRequirement(null);}}>{['G60','F70','G70','G68','G60_G68'].map(m=><option key={m}>{m}</option>)}</Filter>
     <Filter label="Market" value={cohort.country||'US'} onChange={country=>setCohort({...cohort,country})}><option value="all">All markets</option>{(meta?.countries||['US']).map(c=><option key={c}>{c}</option>)}</Filter>
@@ -54,6 +57,8 @@ export function Cockpit(){
    {view==='evidence'&&<EvidenceWorkspace model={cohort.model||'G60'} version={version} onEvidence={setEvidence} refresh={refresh} notify={notify} categories={meta?.categories||{}}/>}
    {view==='comparisons'&&<ComparisonView version={version} onEvidence={setEvidence}/>}
    {view==='decisions'&&<DecisionsView version={version} cohort={cohort} onExport={exportDeck} runJob={runJob} busy={busy}/>}
+   {view==='reviews'&&<ReviewsComments key={cohortQuery(cohort)} cohort={cohort} version={version} categories={meta?.categories||{}} onEvidence={setEvidence} onImported={model=>{setCohort({model,country:'all',powertrain:'all',origin:'unknown'});refresh();}}/>}
+   {view==='rag'&&<DocumentRag version={version} refresh={refresh} notify={notify} runJob={runJob} busy={busy} onEvidence={setEvidence}/>}
    <footer className="page-footer"><span><Database size={13}/> Supplied hackathon data · origin unverified</span><span>Feedback period unknown <span className="footer-dot">·</span> C01–C10 taxonomy v2.0</span></footer>
    </main>
   </div>

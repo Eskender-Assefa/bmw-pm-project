@@ -1,6 +1,8 @@
 # BMW Product Manager Cockpit
 
-A local G60-led hackathon application for exploring supplied evidence, reviewing customer requirements, recording PM decisions and exporting an executive PowerPoint. F70 and G70 are imported alongside G60. The English interface has five views: Overview, Requirements, Evidence library, Comparisons, and Decisions & audit.
+A local G60-led hackathon application for exploring supplied evidence, reviewing customer requirements, recording PM decisions and exporting an executive PowerPoint. F70 and G70 are imported alongside G60. The English interface has six views: Overview, Requirements, Evidence library, Document intelligence, Comparisons, and Decisions & audit.
+
+**Document RAG:** local multi-model PDF/Excel/text indexing, C01-C10 category and scope review, and opt-in cited AI answers. Upgrade existing databases with `.\.venv\Scripts\python.exe -m alembic upgrade head` and restart the backend. See [document ingestion, safeguards and limits](docs/document-rag.md). Existing customer counts and the original ZIP importer are unchanged; Reddit dataset integration is deferred.
 
 ## Run the prepared workspace
 

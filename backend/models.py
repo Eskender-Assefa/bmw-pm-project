@@ -12,6 +12,34 @@ def now():
 class Base(DeclarativeBase):
     pass
 
+
+class RagChunk(Base):
+    __tablename__ = 'rag_chunks'
+    id = Column(String, primary_key=True)
+    evidence_id = Column(String, ForeignKey('evidence.id'), nullable=False, index=True)
+    source_id = Column(String, ForeignKey('sources.id'), nullable=False, index=True)
+    model = Column(String, nullable=True, index=True)
+    text = Column(Text, nullable=False)
+    start = Column(Integer, nullable=False)
+    end = Column(Integer, nullable=False)
+    index_version = Column(String, nullable=False)
+    assignments = Column(JSON, nullable=False, default=list)
+    review_status = Column(String, nullable=False, default='pending', index=True)
+    method = Column(String, nullable=False)
+    revision = Column(Integer, nullable=False, default=1)
+    created_at = Column(String, nullable=False, default=now)
+
+
+class RagRun(Base):
+    __tablename__ = 'rag_runs'
+    id = Column(String, primary_key=True, default=uid)
+    kind = Column(String, nullable=False)
+    model_version = Column(String, nullable=False)
+    prompt_version = Column(String, nullable=False)
+    inputs = Column(JSON, nullable=False)
+    output = Column(JSON, nullable=False)
+    created_at = Column(String, nullable=False, default=now)
+
 class Source(Base):
     __tablename__ = 'sources'
     id = Column(String, primary_key=True, default=uid)
