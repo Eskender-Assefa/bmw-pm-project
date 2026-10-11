@@ -2,13 +2,13 @@
 
 ## Result
 
-The [Premium Product Vision prototype](https://lovable.dev/projects/766e8a40-a0f2-4ab2-ac68-2309a4f8041d) was created in Lovable. Its graphite surfaces, compact navigation, blue interaction accents, and darker problem cards informed `src/app/premium-theme.css` in this repository. The prototype uses sample data; this application remains the source of truth for requirements, scores, citations, decisions, and the hosted Sketchfab G60.
+The [Premium Product Vision prototype](https://lovable.dev/projects/766e8a40-a0f2-4ab2-ac68-2309a4f8041d) was created in Lovable. Its compact navigation, blue interaction accents, and problem cards informed `src/app/premium-theme.css` in this repository. Both the Lovable prototype and working app now use a light theme with white surfaces, neutral borders and charcoal text. The prototype uses sample data; this application remains the source of truth for requirements, scores, citations, decisions, and the hosted Sketchfab G60.
 
 Use this prompt in Lovable to explore a new visual design. Lovable cannot import the existing `application_trial` repository, so treat its output as a design prototype. The maintained application remains the Next.js and Python project in this repository. Bring the chosen layout, styles, and components back into this repository after review.
 
 ## Prompt to paste into Lovable
 
-Design a premium, BMW-inspired dark interface for an existing product-management dashboard called **BMW Product Intelligence**. This is a visual redesign of an existing working application, not a new data product. Produce responsive desktop and mobile views with a coherent design system and realistic sample content. Do not invent API integrations, RAG answers, scoring methods, or approval behavior.
+Design a premium, BMW-inspired light interface for an existing product-management dashboard called **BMW Product Intelligence**. This is a visual redesign of an existing working application, not a new data product. Produce responsive desktop and mobile views with a coherent design system and realistic sample content. Do not invent API integrations, RAG answers, scoring methods, or approval behavior.
 
 The current application has six persistent sidebar tabs: **Overview**, **Problems**, **3D model**, **Evidence library**, **Comparisons**, and **Decisions & audit**. Preserve all six. The selected BMW model is G60; model, market, powertrain, and evidence-origin filters are visible across views. Keep clear access to Import sources, Connect web evidence, and Export board deck.
 
@@ -18,7 +18,7 @@ The **3D model** view hosts the supplied 2024 BMW G60 Sketchfab viewer. Design a
 
 The Overview should show customer feedback, candidate requirements, mapping coverage, approved decisions, category opportunity, and evidence readiness with strong hierarchy. Evidence library, Comparisons, and Decisions & audit should look like parts of the same product, with readable tables, evidence references, and decision history.
 
-Art direction: deep graphite/navy surfaces, restrained electric blue interaction accents, warm neutral text, and red reserved for urgent or selected vehicle components. Use excellent type hierarchy, consistent spacing, subtle borders and depth, crisp charts, and accessible contrast. Aim for a polished automotive planning tool, not a gaming HUD. Make the 3D viewer feel central. Avoid large empty hero areas, decorative car photos, fake data, and marketing-site styling. Keep keyboard focus, hover, selected, loading, and empty states coherent. On mobile, collapse the sidebar into navigation and stack the problem/model split without losing either view.
+Art direction: white/off-white surfaces, restrained BMW blue interaction accents, dark charcoal text, and red reserved for urgent or selected vehicle components. Use excellent type hierarchy, consistent spacing, subtle borders and depth, crisp charts, and accessible contrast. Aim for a polished automotive planning tool, not a gaming HUD. Make the 3D viewer feel central. Avoid large empty hero areas, decorative car photos, fake data, and marketing-site styling. Keep keyboard focus, hover, selected, loading, and empty states coherent. On mobile, collapse the sidebar into navigation and stack the problem/model split without losing either view.
 
 Deliver a working visual prototype and identify reusable colors, typography, spacing, components, and responsive rules. The implementation will be adapted into the existing Next.js frontend; its Python backend, database, data imports, and hosted Sketchfab integration must remain intact.
 

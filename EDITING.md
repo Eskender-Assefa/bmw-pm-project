@@ -15,7 +15,7 @@ include the supplied RAG, review and Reddit collection workflows.
 ## Source map
 
 - `src/components/cockpit.tsx`: navigation, cohort and shared job controls.
-- `src/app/premium-theme.css`: the Lovable-based dark styling and roundel layout.
+- `src/app/premium-theme.css`: the Lovable-based light styling and roundel layout.
 - `src/app/rag-theme.css`: matching styles for the imported RAG/reviews panels.
 - `src/components/problem-workspace.tsx`: ranked problems, scores, sources,
   document-search links and the merged 3D workspace.

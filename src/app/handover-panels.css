@@ -10,7 +10,7 @@
 .trend-column header h2 svg{color:#56667b}.proposal-conflicts{list-style:none;margin:10px 0 0;padding:8px 10px;background:#fffaf0;border:1px solid #f2e8ce;border-radius:6px;font-size:10px;color:#7a5c1e}.proposal-conflicts li{display:flex;gap:6px;align-items:flex-start;padding:2px 0}.proposal-conflicts svg{flex-shrink:0;margin-top:2px}.proposal-review{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:1px solid #edf1f6}.proposal-review .badge{margin-left:0}.proposal-review small{font-size:10px;color:#56667b;flex:1;min-width:120px}.proposal-review .button{margin-left:auto;min-height:36px}.trend-column>.text-link{font-size:11px;min-height:36px}
 
 
-/* Match the handover workspaces to the Lovable-inspired graphite interface. */
+/* Match the handover workspaces to the shared Lovable light palette. */
 .usp-controls h2,.trend-column header h2,.trend-card h3,.usp-detail strong{color:var(--text)}
 .usp-controls p,.usp-controls label,.trend-column header p,.trend-card>p,.trend-signal,.trend-stance,.trend-none,.usp-detail>span,.usp-detail li,.trend-toggle,.trend-sources small{color:var(--muted)}
 .usp-controls input,.trend-card,.usp-detail,.trend-column header h2 span{background:var(--surface-raised);color:var(--text);border-color:var(--border)}
@@ -18,7 +18,7 @@
 .trend-column,.trend-stance,.proposal-review,.usp-table th{border-color:var(--border)}
 .trend-column header h2 span{color:var(--muted)}
 .trend-stance strong,.proposal-review small{color:var(--text)}
-.trend-sources a{color:#9fc4ee}
-.proposal-conflicts{background:#352b22;border-color:#6b5030;color:#efc887}
-.usp-chart .grid{stroke:#39434f}.usp-chart .zero{stroke:#758396}.usp-chart .tick,.usp-chart .axis{fill:#aeb9c5}.usp-chart .point-label{fill:var(--text);stroke:var(--surface)}
-.usp-chart .point .mark{stroke:var(--surface)}.usp-chart .point .range{stroke:#74869a}
+.trend-sources a{color:var(--blue)}
+.proposal-conflicts{background:var(--warning-soft);border-color:var(--warning-border);color:var(--warning)}
+.usp-chart .grid{stroke:var(--border)}.usp-chart .zero{stroke:var(--subtle)}.usp-chart .tick,.usp-chart .axis{fill:var(--muted)}.usp-chart .point-label{fill:var(--text);stroke:var(--surface)}
+.usp-chart .point .mark{stroke:var(--surface)}.usp-chart .point .range{stroke:var(--subtle)}

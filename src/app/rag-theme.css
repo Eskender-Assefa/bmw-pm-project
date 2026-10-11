@@ -10,10 +10,10 @@
 .rag-passage blockquote, .review-comment-text { color:var(--text); }
 .rag-overview caption { color:var(--muted); background:var(--surface-soft); padding:10px 12px; }
 .rag-overview thead th { color:var(--muted); background:var(--surface-raised); }
-.rag-coverage-table .is-selected { background:#263746; }
-.rag-citation, .rag-row-quote blockquote { background:#1c2c2b; border-color:#6ea59e; }
+.rag-coverage-table .is-selected { background:var(--accent-soft); }
+.rag-citation, .rag-row-quote blockquote { background:var(--success-soft); border-color:var(--success-border); }
 .rag-answer ul, .review-duplicate, .reddit-result-counts .reddit-shortfall,
-.reddit-result-counts .reddit-shortfall strong { color:#dab781; }
+.reddit-result-counts .reddit-shortfall strong { color:var(--warning); }
 .rag-more-filters summary, .rag-row-quote summary { color:var(--blue); }
 .rag-assignment { border-radius:3px; }
 .reviews-intro { background:var(--surface); border-color:var(--border); border-radius:3px; }
