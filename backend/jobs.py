@@ -45,6 +45,22 @@ def execute(job_id):
                 progress_messages[job_id]='Fetching seeded web evidence'
                 result=import_web(s,WebConnectorRequest.model_validate(payload),lambda message:progress_messages.update({job_id:message}))
                 seed_requirements(s)
+            elif kind=='rag_import':
+                from .documents import import_documents
+                result=import_documents(s,payload,lambda message:progress_messages.update({job_id:message}))
+            elif kind=='rag_index':
+                from .rag import index_sources
+                result=index_sources(s,payload['source_ids'],lambda message:progress_messages.update({job_id:message}))
+            elif kind=='rag_classify':
+                from .rag import classify
+                from .rag_schemas import RagClassifyRequest
+                progress_messages[job_id]='Classifying selected passages; existing human reviews stay unchanged'
+                result=classify(s,RagClassifyRequest.model_validate(payload))
+            elif kind=='rag_answer':
+                from .rag import answer
+                from .rag_schemas import RagAnswerRequest
+                progress_messages[job_id]='Retrieving passages and validating a grounded answer'
+                result=answer(s,RagAnswerRequest.model_validate(payload))
             else: raise ValueError('Unknown job type.')
             job=s.get(Job,job_id);job.result=result;job.state='succeeded';job.progress='Complete';job.updated_at=now();s.commit()
     except Exception as exc:
