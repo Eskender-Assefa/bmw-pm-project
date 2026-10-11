@@ -1,2 +1,2 @@
-import { redirect } from 'next/navigation';
-export default function Page() { redirect('/studio.html'); }
+import { Cockpit } from '@/components/cockpit';
+export default function Page() { return <Cockpit/>; }

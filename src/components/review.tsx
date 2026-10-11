@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { AlertTriangle, ArrowUpRight, Check, Clock3, ExternalLink, FileText, History, Pencil, Quote, Sparkles, X, ShieldCheck, LoaderCircle } from 'lucide-react';
 import { Modal } from './ui/dialog';
 import { Button } from './ui/button';
+import { VehiclePreview } from './vehicle-preview';
 import { api,useApi,cohortQuery,number,date,type Cohort,type RequirementView,type DecisionInput,type Proposal } from '@/lib/api';
 import { Badge,Empty,ErrorBox,Loading,type Notify,type RunJob } from './cockpit';
 
@@ -22,6 +23,7 @@ export function RequirementDrawer({id,onClose,cohort,version,onEvidence,refresh,
   {error?<ErrorBox message={error}/>:!item?<Loading/>:<><div className="drawer-scroll"><div className="detail-kicker"><Badge tone="blue">{item.category}</Badge><Badge>{item.mapping_status==='reviewed'?'Mappings reviewed':'Suggested mapping'}</Badge><span>Revision {item.revision}</span></div><h2 className="requirement-title">{item.title}</h2><p className="requirement-description">{item.description}</p>
   {item.critical&&<div className="notice critical"><AlertTriangle size={19}/><div><strong>Critical review flag</strong><p>Source wording may describe serious harm. This flags expert review and does not confirm a defect.</p></div></div>}
   <div className="detail-metrics"><div><small>Unmet-need demand</small><strong>{((item.demand||0)*100).toFixed(1)}%</strong><span>{number(item.numerator)} / {number(item.denominator)} records</span></div><div><small>PM impact band</small><strong className="impact-label">{item.band}</strong><button className="text-link" onClick={()=>setAction('set_band')}>Review impact<Pencil size={12}/></button></div><div><small>Decision</small><span className={'status status-'+item.status}><span/>{item.status}</span><small>Specific to this cohort</small></div></div>
+  {cohort.model==='G60'&&<details className="vehicle-drawer-preview" open><summary>3D component &amp; improvement preview</summary><VehiclePreview cohort={cohort} version={version} focused={item} compact/></details>}
   <section className="detail-section"><h3>Proposed acceptance criteria</h3><ul className="criteria-list">{item.acceptance_criteria.map((c,i)=><li key={i}><span>{String(i+1).padStart(2,'0')}</span>{c}</li>)}</ul></section>
   <div className="analysis-tools"><div><Sparkles size={19}/><div><strong>AI-assisted interpretation</strong><small>{data?.replays.length?`${data.replays.length} saved result(s). Version checks apply.`:'No saved analysis for this requirement yet.'}</small></div></div><div><select aria-label="Analysis mode" value={mode} onChange={e=>setMode(e.target.value as 'live'|'replay')}><option value="replay">Saved replay</option><option value="live">Live AI</option></select><Button variant="outline" size="sm" disabled={busy||(mode==='live'&&!liveConfigured)} onClick={runAnalysis}><Sparkles size={14}/>{mode==='replay'?'Replay analysis':'Run live analysis'}</Button></div></div>
   {mode==='live'&&<p className="form-note">Live analysis sends up to eight distinct supporting comments to the configured OpenAI API. It does not change your requirement until you adopt the draft.</p>}

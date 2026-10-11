@@ -35,7 +35,7 @@ try {
     const response = await route.fetch({url: apiUrl + url.pathname + url.search});
     await route.fulfill({response});
   });
-  await page.goto('http://127.0.0.1:3001');
+  await page.goto('http://127.0.0.1:3001/studio.html');
   console.log('Studio opened');
   await page.waitForFunction(() => document.querySelector('#k-total')?.textContent === '216');
   assert.equal(await page.locator('#k-evidence').textContent(), '3610');

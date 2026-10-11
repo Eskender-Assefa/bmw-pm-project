@@ -2,7 +2,7 @@
 
 ## Application Trial — combined local website
 
-This copy combines the visual layout of the original HTML Product Decision Studio with the Python/SQLite backend. Start with `npm run dev` and open **http://127.0.0.1:3001**. The API runs on port **8001**. The header links to the complete React cockpit and the preserved original prototype.
+This copy uses the original React cockpit with its five sidebar tabs: Overview, Requirements, Evidence library, Comparisons, and Decisions & audit. Start with `npm run dev` and open **http://127.0.0.1:3001**. The API runs on port **8001**. Overview and requirement review include an interactive G60 schematic with component priorities and screen, vent and seat concept previews. See [the 3D model notes](docs/G60_3D.md). The connected HTML Studio remains at `/studio.html`, and the original prototype remains at `/legacy/BMW_Product_Decision_Prototype.html`.
 
 For a fresh Linux checkout (Node.js 20.9+ and Python required):
 
