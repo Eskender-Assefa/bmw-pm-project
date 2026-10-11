@@ -10,12 +10,14 @@ import * as THREE from 'three';
 import { chromium } from '@playwright/test';
 
 const root=process.cwd(),output=path.join(root,'.local/vehicle-check');await fs.mkdir(output,{recursive:true});
-for(const name of ['vehicle-priority','g60-geometry']) {
+for(const name of ['vehicle-priority','g60-geometry','requirement-ranking']) {
   const source=await fs.readFile(path.join(root,`src/lib/${name}.ts`),'utf8');
   const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText.replace("'./vehicle-priority'","'./vehicle-priority.mjs'");
   await fs.writeFile(path.join(output,name+'.mjs'),code);
 }
 const priority=await import(pathToFileURL(path.join(output,'vehicle-priority.mjs')));
+const {sortRequirements}=await import(pathToFileURL(path.join(output,'requirement-ranking.mjs')));
+assert.deepEqual(sortRequirements([{id:'a',feature:'A',critical:false,band:'High',demand:.8},{id:'b',feature:'B',critical:true,band:'Unscored',demand:.1},{id:'c',feature:'C',critical:false,band:'High',demand:.9}]).map(r=>r.id),['b','c','a']);
 const {createG60Geometry}=await import(pathToFileURL(path.join(output,'g60-geometry.mjs')));
 const req=(feature,band='Unscored',critical=false)=>({feature,band,critical,title:`Improve ${feature}`,description:'Review this customer need'});
 assert.equal(priority.componentForRequirement(req('Seat belts')),null);
@@ -42,6 +44,7 @@ geometry.setStyle(priorities,null,.2);
 assert.equal(geometry.components.brakes.children[0].material.color.getHexString(),'ef4444');
 geometry.setConcept('seats',['screen','vents']);for(let i=0;i<100;i++)geometry.update(.05);
 assert.ok(size('screen').z>baselineScreen.z*1.75&&size('vents').y>baselineVents.y*2.9,'Accepted designs accumulate');
+geometry.setFocus(['screen','vents']);geometry.update(.1);assert.equal(geometry.components.screen.children[0].children[0].material.color.getHexString(),'ff202d');
 geometry.dispose();
 console.log('Passed component mapping, truthful priority colours, actual mesh transformations and reset.');
 
@@ -49,14 +52,14 @@ const dataDir=path.join(output,'db-'+Date.now());
 execFileSync(path.join(root,'.venv/bin/python'),['-c','import pathlib,sqlite3,sys; p=pathlib.Path(sys.argv[2]); p.mkdir(parents=True); src=sqlite3.connect("file:"+sys.argv[1]+"?mode=ro",uri=True); dst=sqlite3.connect(p/"cockpit.sqlite"); src.backup(dst); dst.close(); src.close()',path.join(root,'.local/cockpit.sqlite'),dataDir]);
 const socket=createServer();socket.listen(0,'127.0.0.1');await once(socket,'listening');const port=socket.address().port;await new Promise(resolve=>socket.close(resolve));
 const apiUrl=`http://127.0.0.1:${port}`;
-const backend=spawn(path.join(root,'.venv/bin/python'),['-m','uvicorn','backend.app:app','--host','127.0.0.1','--port',String(port)],{cwd:root,env:{...process.env,BMWPM_DATA_DIR:dataDir,BMWPM_DATABASE_URL:`sqlite:///${dataDir}/cockpit.sqlite`},stdio:'ignore'});
+const backend=spawn(path.join(root,'.venv/bin/python'),['-m','uvicorn','backend.app:app','--host','127.0.0.1','--port',String(port)],{cwd:root,env:{...process.env,OPENAI_API_KEY:'',BMWPM_DATA_DIR:dataDir,BMWPM_DATABASE_URL:`sqlite:///${dataDir}/cockpit.sqlite`},stdio:'ignore'});
 let browser;
 try {
 for(let i=0;i<100;i++){try{if((await fetch(apiUrl+'/api/v1/health')).ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}
 browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_PATH||path.join(root,'.local/browser-cache/chromium-1248/chrome-linux64/chrome'),headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
   const page=await browser.newPage({viewport:{width:1500,height:1100}});page.setDefaultTimeout(30000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  const writes=[];page.on('request',r=>{if(r.method()==='POST')writes.push(r.url());});
+  const writes=[];page.on('request',r=>{if(r.method()==='POST'&&r.url().includes('/decisions'))writes.push(r.url());});
   await page.route('**/api/v1/**',async route=>{const url=new URL(route.request().url());const response=await route.fetch({url:apiUrl+url.pathname+url.search});await route.fulfill({response});});
   await page.goto('http://127.0.0.1:3001/',{waitUntil:'domcontentloaded'});
   const tabs=page.locator('.sidebar nav .nav-item');
@@ -64,6 +67,21 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   const panel=page.getByRole('region',{name:'G60 3D component priorities'});
   await panel.locator('[data-rendered=true]').waitFor();
   await panel.screenshot({path:path.join(output,'baseline.png')});
+  assert.equal(await panel.getByLabel('Car component',{exact:true}).count(),0,'No component picker required');
+  assert.equal(await panel.getByLabel('Improvement category').locator('option').count(),11,'All ten categories retained');
+  await panel.getByLabel('Search ranked improvements').fill('Touch screen');
+  await panel.getByRole('group',{name:'Ranked improvements',exact:true}).getByRole('button',{name:'Touch screen, operation',exact:true}).click();
+  await panel.locator('[data-highlighted=screen][data-concept=screen]').waitFor();
+  await panel.locator('.vehicle-mapping-note strong').filter({hasText:'Local part matching'}).waitFor();
+  await panel.getByLabel('Search ranked improvements').fill('');
+  await panel.getByLabel('Improvement category').selectOption('C05');
+  assert.ok((await panel.locator('.vehicle-ranked-row small').allTextContents()).every(t=>t.startsWith('C05')));
+  await panel.getByLabel('Improvement category').selectOption('');
+  await panel.getByLabel('Sort improvements').selectOption('demand');
+  const demand=await panel.locator('.vehicle-row-signals>span:first-of-type').allTextContents();
+  assert.ok(demand.every((t,i)=>!i||parseFloat(demand[i-1])>=parseFloat(t)));
+  await panel.getByLabel('Sort improvements').selectOption('priority');
+  await panel.locator('.vehicle-demo-presets summary').click();
   for(const [name,concept] of [['Larger screen','screen'],['Larger air vents','vents'],['Adjustable seats','seats']]) {
     await panel.getByRole('button',{name:new RegExp(name)}).click();
     await panel.locator(`[data-concept=${concept}][data-view=cabin]`).waitFor();
@@ -81,6 +99,7 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   await page.getByRole('button',{name:'Touch screen, operation',exact:true}).click();
   const drawer=page.getByRole('dialog',{name:'Requirement review'});
   await drawer.locator('[data-component=screen][data-rendered=true]').waitFor();
+  await drawer.locator('.vehicle-demo-presets summary').click();
   await drawer.getByRole('button',{name:/Larger screen/}).click();
   await drawer.locator('[data-concept=screen]').waitFor();
   await page.keyboard.press('Escape');
@@ -93,13 +112,14 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   await page.setViewportSize({width:390,height:844});
   await page.getByRole('region',{name:'G60 3D component priorities'}).screenshot({path:path.join(output,'mobile.png')});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'No page overflow on mobile');
-  assert.deepEqual(writes,[],'Concepts must not save decisions or call AI');
+  assert.deepEqual(writes,[],'Selecting ranked needs and previews must not save decisions');
   await page.setViewportSize({width:1500,height:1100});
   await page.getByRole('button',{name:'Requirements',exact:true}).click();
   await page.getByLabel('Search requirements').fill('Touch screen');
   await page.getByRole('button',{name:'Touch screen, operation',exact:true}).click();
   const acceptedDrawer=page.getByRole('dialog',{name:'Requirement review'});
   await acceptedDrawer.locator('[data-rendered=true]').waitFor();
+  await acceptedDrawer.locator('.vehicle-demo-presets summary').click();
   await acceptedDrawer.getByRole('button',{name:/Larger screen/}).click();
   await acceptedDrawer.getByRole('button',{name:'Approve',exact:true}).click();
   const approval=page.getByRole('dialog',{name:'Approve requirement',exact:true});

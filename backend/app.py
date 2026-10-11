@@ -14,6 +14,7 @@ from .db import session_dependency
 from .models import (Source,EvidenceRef,Feedback,Aspect,Feature,Fact,Vehicle,Requirement,RequirementRevision,Decision,AuditEvent,Job,Export,EvaluationLabel,AnalysisRun,now)
 from .schemas import (Cohort,RankingResponse,DecisionRequest,ImportRequest,JobView,AnalysisRequest,AnalysisProposal,ExportRequest,MappingReviewRequest,FactReviewRequest,EvaluationRequest,WebConnectorRequest)
 from .services import ranking,detail,decide,evidence_detail,evaluation_metrics
+from .vehicle_target import TargetRequest, TargetResult, resolve_target
 from .taxonomy import CATEGORIES
 from .audit import append_event,verify_audit
 from .config import DATA_DIR,DEFAULT_MODEL,PIPELINE_VERSION
@@ -86,6 +87,11 @@ def requirement_detail(requirement_id:str,db:DB,cohort:COHORT):
 @app.post('/api/v1/requirements/{requirement_id}/decisions')
 def requirement_decision(requirement_id:str,request:DecisionRequest,db:DB):
     return decide(db,requirement_id,request)
+
+@app.post('/api/v1/vehicle-target',response_model=TargetResult)
+def vehicle_target(request:TargetRequest,db:DB):
+    item,_=detail(db,request.requirement_id,request.cohort)
+    return resolve_target(item,request.cohort,request.allow_live)
 
 @app.get('/api/v1/sources')
 def sources(db:DB):

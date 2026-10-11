@@ -142,7 +142,10 @@ export function createG60Geometry() {
   }
   const progress={screen:0,vents:0,seats:0};
   let targets = new Set<Concept>(), elapsed=0;
+  let highlighted:ComponentId[]=[];let motionReduced=false;
+  const baseColors={} as Record<ComponentId,THREE.Color>;
   return {root, components, anchors,
+    setFocus(ids:ComponentId[],reduced=false){highlighted=ids;motionReduced=reduced;},
     setConcept(value: Concept, applied: Concept[] = []) {targets=new Set([...applied,...(value==='baseline'?[]:[value])]);},
     update(delta: number) {
       elapsed+=delta;
@@ -152,6 +155,11 @@ export function createG60Geometry() {
       display.position.y=1.1+screenScale*.13;
       vents.scale.set(1,1+ventScale*2,1+ventScale*.18);
       frontSeats.forEach((seat,i)=>{seat.position.x=-.2+seatShift*.38;seat.position.y=.57+seatShift*.20;backrests[i].rotation.z=seatShift*.5;});
+      for(const id of Object.keys(COMPONENTS) as ComponentId[]){
+        const material=partMaterials[id];
+        if(highlighted.includes(id)){material.color.set('#ff202d');material.emissive.set('#ff1020');material.emissiveIntensity=motionReduced?.5:.25+(Math.sin(elapsed*Math.PI*1.6)+1)*.55;material.opacity=1;}
+        else if(baseColors[id]){material.color.copy(baseColors[id]);material.emissive.copy(material.color);material.emissiveIntensity=.07;}
+      }
       root.updateMatrixWorld(true);
       for(const id of ['screen','vents','seats'] as const){
         ghosts[id].visible=progress[id]>.01;outlines[id].visible=progress[id]>.01;
@@ -164,7 +172,7 @@ export function createG60Geometry() {
     },
     setStyle(priorities: Record<ComponentId,Priority>, selected: ComponentId|null, opacity: number) {
       for(const id of Object.keys(COMPONENTS) as ComponentId[]) {
-        const material=partMaterials[id];material.color.set(PRIORITY_COLORS[priorities[id]]);
+        const material=partMaterials[id];material.color.set(PRIORITY_COLORS[priorities[id]]);baseColors[id]=material.color.clone();
         material.emissive.copy(material.color);material.emissiveIntensity=id===selected ? .35 : .07;
         material.opacity=selected && id!==selected ? .55 : .96;
       }

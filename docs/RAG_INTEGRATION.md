@@ -11,3 +11,5 @@ Proposed responses contain an answer, citations with existing evidence/source ID
 Resolve citations against retained source records before displaying them. Keep generated interpretations separate from measured demand, PM impact bands and approved decisions. Require the existing PM review/revision flow to adopt changed requirement text. A proposed design concept may drive the preview controls after explicit selection, but should never silently save a decision or modify source evidence.
 
 Extension points: `RequirementDrawer` for cited interpretation; `VehiclePreview` for the selected validated concept; existing `EvidenceModal` for original citations. Final endpoint and payload shapes remain to be agreed with the engine team.
+
+The separate `/api/v1/vehicle-target` classifier now supplies constrained part IDs and an optional supported design preset on row selection, with explicit live-AI opt-in and a labelled local fallback. The future RAG engine can supply the same validated contract. It does not replace the ten source categories or estimate benefit/ROI.

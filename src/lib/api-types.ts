@@ -106,6 +106,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/vehicle-target": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Vehicle Target */
+        post: operations["vehicle_target_api_v1_vehicle_target_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/sources": {
         parameters: {
             query?: never;
@@ -811,6 +828,40 @@ export interface components {
             /** Created At */
             created_at: string;
         };
+        /** TargetRequest */
+        TargetRequest: {
+            cohort: components["schemas"]["Cohort"];
+            /** Requirement Id */
+            requirement_id: string;
+            /**
+             * Allow Live
+             * @default false
+             */
+            allow_live: boolean;
+        };
+        /** TargetResult */
+        TargetResult: {
+            /** Components */
+            components: ("screen" | "vents" | "seats" | "drivetrain" | "brakes" | "battery" | "steering" | "lighting" | "assistance" | "storage")[];
+            /** Concept */
+            concept: ("screen" | "vents" | "seats") | null;
+            /**
+             * Confidence
+             * @enum {string}
+             */
+            confidence: "high" | "medium" | "low";
+            /** Reason */
+            reason: string;
+            /** Supporting Quote */
+            supporting_quote: string;
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "ai" | "local";
+            /** Notice */
+            notice: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -1024,6 +1075,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    vehicle_target_api_v1_vehicle_target_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TargetRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TargetResult"];
                 };
             };
             /** @description Validation Error */
