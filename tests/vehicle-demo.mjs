@@ -28,6 +28,8 @@ const priorities=priority.componentPriorities([req('Braking','Low',true),req('Se
 assert.equal(priorities.brakes,'critical');assert.equal(priorities.seats,'High');assert.equal(priorities.screen,'Unscored');assert.equal(priorities.vents,'none');
 assert.equal(priority.conceptForRequirement(req('Seats')),'baseline');
 assert.equal(priority.conceptForRequirement({...req('Touch screen, operation'),title:'Make the screen larger'}),'screen');
+for(let i=1;i<=10;i++)assert.ok(priority.demoPartForRequirement({...req('Unmatched issue'),category:'C'+String(i).padStart(2,'0')}),'Each category has a GUI highlight fallback');
+assert.equal(priority.demoPartForRequirement({...req('Power output'),category:'C01'}),'drivetrain');
 const geometry=createG60Geometry();
 const size=id=>{geometry.root.updateMatrixWorld(true);return new THREE.Box3().setFromObject(geometry.components[id]).getSize(new THREE.Vector3());};
 const baselineScreen=size('screen'),baselineVents=size('vents');
@@ -72,6 +74,9 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
   assert.ok(await page.locator('.problem-citation button').first().textContent().then(t=>t.includes('.xlsx')),'Original filename included');
   assert.ok(await page.locator('.problem-detail').first().textContent().then(t=>t.length>100));
   assert.equal(await page.locator('.problem-model-panel').isVisible(),false);
+  await page.getByRole('button',{name:'3D model',exact:true}).click();
+  await page.locator('[data-surface=drivetrain]').waitFor();
+  await page.getByRole('button',{name:'Problems',exact:true}).click();
   await page.getByLabel('Search problems').fill('Touch screen');
   await page.getByRole('button',{name:'Select problem: Touch screen, operation',exact:true}).click();
   const selectedId=await page.locator('.problem-card.selected').getAttribute('data-problem-id');
@@ -104,6 +109,9 @@ browser=await chromium.launch({executablePath:process.env.PLAYWRIGHT_EXECUTABLE_
     if(concept==='seats')await page.waitForFunction(()=>window.viewerOperations.some(o=>o.op==='matrix'&&o.data.m[13]===.2&&o.data.m[14]===.38));
     else await panel.locator(`[data-surface=${concept}][data-changed=true]`).waitFor();
   }
+  await panel.getByRole('button',{name:'Show new seats',exact:true}).click();
+  await panel.locator('.model-surface-label').filter({hasText:'NEW SEATS · teal upholstery + revised profile'}).waitFor();
+  await page.waitForFunction(()=>window.viewerOperations.filter(o=>o.op==='material'&&o.data.name==='Seats').at(-1)?.data.channels.AlbedoPBR.color?.[1]===.48);
   await panel.getByRole('button',{name:'Baseline',exact:true}).click();
   await page.waitForFunction(()=>window.viewerOperations.filter(o=>o.op==='matrix').at(-1)?.data.m[13]===0);
   await panel.getByLabel('Body opacity').fill('35');

@@ -1,4 +1,4 @@
-import type { CameraView, ComponentId, Concept } from './vehicle-priority';
+import type { CameraView, ComponentId, Concept, DemoPart } from './vehicle-priority';
 
 export type Channel = {enable?:boolean;factor?:number;color?:number[];type?:string;texture?:unknown;[key:string]:unknown};
 export type Material = {id:string;name:string;stateSetID:number;channels:Record<string,Channel>;[key:string]:unknown};
@@ -17,13 +17,22 @@ export interface ViewerAPI {
   getWorldToScreenCoordinates(position:number[],callback:(coordinates:{canvasCoord:number[];glCoord:number[]})=>void):void;
 }
 export type DesignConcept=Exclude<Concept,'baseline'>;
-export type SceneSettings={highlighted:ComponentId[];concepts:DesignConcept[];opacity:number};
+export type SceneSettings={highlighted:DemoPart[];concepts:DesignConcept[];opacity:number};
 export const MATERIAL_PARTS:Partial<Record<ComponentId,string>>={seats:'Seats',steering:'SteeringWheel',lighting:'Lights'};
 // Coordinates calibrated on the public Viewer API, in its Z-up world space.
 // These are surface projections because the author merged the display and dashboard into larger assemblies.
 export const SURFACES={
   screen:{position:[.1,-.46,1],normal:[.15,.96,.22],baseline:[.78,.19,.055],after:[1.404,.3135,.055]},
   vents:{position:[-.1,-.47,.88],normal:[0,1,0],baseline:[.8,.045,.13],after:[.944,.135,.20]},
+};
+// Approximate x-ray markers: these stand in for parts absent from the hosted mesh.
+export const DEMO_REGIONS:Partial<Record<DemoPart,{label:string;position:number[];size:number[]}>>={
+  drivetrain:{label:'ENGINE / POWER',position:[0,-1.4,.9],size:[1.25,1.3]},
+  brakes:{label:'BRAKES / WHEEL',position:[.83,-1.42,.5],size:[.65,.75]},
+  battery:{label:'ENERGY / BATTERY',position:[0,.15,.3],size:[1.25,2]},
+  assistance:{label:'DRIVER ASSISTANCE',position:[0,-2.15,.65],size:[1.2,.55]},
+  storage:{label:'LUGGAGE AREA',position:[0,1.75,.95],size:[1.3,1]},
+  body:{label:'VEHICLE / BODY',position:[0,0,1],size:[1.65,4.2]},
 };
 export const CAMERAS:Record<CameraView,{position:number[];target:number[]}>= {
   exterior:{position:[5,-7,3.4],target:[0,0,.65]},
@@ -36,7 +45,7 @@ function call<T>(invoke:(callback:Callback<T>)=>void):Promise<T>{
 }
 export function seatMatrix(original:number[],changed:boolean){
   const next=[...original];
-  if(changed){next[13]+=.2;next[14]+=.38;}
+  if(changed){for(let row=0;row<3;row++){next[row]*=1.06;next[4+row]*=1.08;next[8+row]*=.9;}next[13]+=.2;next[14]+=.38;}
   return next;
 }
 export class G60Controller {
@@ -57,7 +66,7 @@ export class G60Controller {
   }
   async projectSurfaces(settings:SceneSettings):Promise<SurfaceProjection[]>{
     if(this.disposed)return [];
-    if(!['screen','vents'].some(part=>settings.highlighted.includes(part as ComponentId)||settings.concepts.includes(part as DesignConcept)))return [];
+    if(!settings.highlighted.length&&!settings.concepts.length)return [];
     const camera=await call<{position:number[];target:number[]}>(cb=>this.api.getCameraLookAt(cb));
     const surfaces:SurfaceProjection[]=[];
     for(const part of ['screen','vents'] as const){
@@ -74,9 +83,18 @@ export class G60Controller {
       })));
       if(points.every(p=>p?.length>=2&&p.every(Number.isFinite)))surfaces.push({part,points,changed,selected:settings.highlighted.includes(part)});
     }
+    for(const part of settings.highlighted){
+      const region=DEMO_REGIONS[part];if(!region)continue;
+      const corners=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([x,y])=>[region.position[0]+x*region.size[0]/2,region.position[1]+y*region.size[1]/2,region.position[2]]);
+      const points=await Promise.all(corners.map(point=>new Promise<number[]>((resolve,reject)=>{
+        const timer=setTimeout(()=>reject(new Error('Region projection unavailable.')),3000);
+        this.api.getWorldToScreenCoordinates(point,c=>{clearTimeout(timer);resolve(c.canvasCoord);});
+      })));
+      if(points.every(p=>p?.length>=2&&p.every(Number.isFinite)))surfaces.push({part,points,changed:false,selected:true});
+    }
     return surfaces;
   }
-  camera(view:CameraView,highlighted:ComponentId[]=[]){const seats=view==='cabin'&&highlighted.includes('seats');const camera=seats?{position:[3,2.8,2.5],target:[0,.4,.8]}:CAMERAS[view];this.api.setFov(view==='cabin'&&!seats?60:35);this.api.setCameraLookAt(camera.position,camera.target,0);}
+  camera(view:CameraView,highlighted:DemoPart[]=[]){const seats=view==='cabin'&&highlighted.includes('seats');const camera=seats?{position:[3,2.8,2.5],target:[0,.4,.8]}:CAMERAS[view];this.api.setFov(view==='cabin'&&!seats?60:35);this.api.setCameraLookAt(camera.position,camera.target,0);}
   apply(settings:SceneSettings):Promise<string>{
     let message='';const revision=++this.revision;
     const operation=this.queue.then(async()=>{if(this.disposed||revision!==this.revision)return;message=await this.update(settings);});
@@ -85,29 +103,34 @@ export class G60Controller {
   }
   private async update({highlighted,concepts,opacity}:SceneSettings){
     this.stopPulse();
-    const pulseNames=highlighted.flatMap(id=>MATERIAL_PARTS[id]?[MATERIAL_PARTS[id]!]:[]);
+    const pulseNames=highlighted.flatMap(id=>MATERIAL_PARTS[id as ComponentId]?[MATERIAL_PARTS[id as ComponentId]!]:[]);
     for(const original of this.materials){
       if(this.disposed)return '';
       const material=structuredClone(original);
-      if((['Car_Body','Glass'].includes(material.name)||(highlighted.includes('seats')&&['Interior','Door_Panel'].includes(material.name))))material.channels.Opacity={...material.channels.Opacity,enable:true,type:'alphaBlend',factor:material.name==='Glass'?Math.min(opacity,.08):opacity};
-      if(material.name==='Seats'&&concepts.includes('seats'))material.channels.EmitColor={enable:true,factor:.45,color:[0,.65,.85],type:'additive'};
+      if((['Car_Body','Glass'].includes(material.name)||((highlighted.includes('seats')||concepts.includes('seats'))&&['Interior','Door_Panel'].includes(material.name))))material.channels.Opacity={...material.channels.Opacity,enable:true,type:'alphaBlend',factor:material.name==='Glass'?Math.min(opacity,.08):opacity};
+      if(material.name==='Seats'&&concepts.includes('seats')){
+        material.channels.AlbedoPBR={enable:true,factor:1,color:[.015,.48,.62]};
+        material.channels.EmitColor={enable:true,factor:.22,color:[0,.55,.7],type:'additive'};
+        material.channels.RoughnessPBR={enable:true,factor:.3};
+        material.channels.MetalnessPBR={enable:true,factor:.08};
+      }
       await call(cb=>this.api.setMaterial(material,cb));
-      if(pulseNames.includes(material.name))this.pulseMaterials.push(material);
+      if(pulseNames.includes(material.name)&&!(material.name==='Seats'&&concepts.includes('seats')))this.pulseMaterials.push(material);
     }
     if(this.seats&&this.seatOriginal.length===16)await call(cb=>this.api.setMatrix(this.seats!.instanceID,seatMatrix(this.seatOriginal,concepts.includes('seats')),cb));
     if(this.disposed)return '';
     const pulse=(bright:boolean)=>{for(const original of this.pulseMaterials){const m=structuredClone(original);m.channels.AlbedoPBR={enable:true,factor:1,color:bright?[1,.015,.025]:[.2,.01,.015]};m.channels.EmitColor={enable:true,color:bright?[1,.015,.025]:[.3,.005,.01],factor:bright?.9:.25,type:'additive'};this.api.setMaterial(m);}};
     pulse(true);
     if(this.pulseMaterials.length&&!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches){let bright=true;this.timer=setInterval(()=>{bright=!bright;pulse(bright);},700);}
-    const unsupported=highlighted.filter(id=>!MATERIAL_PARTS[id]&&id!=='screen'&&id!=='vents');
-    const missing=highlighted.filter(id=>MATERIAL_PARTS[id]&&!this.materials.some(m=>m.name===MATERIAL_PARTS[id]));
-    return [...(unsupported.length?[`No separate mesh for ${unsupported.join(', ')} in this hosted model.`]:[]),...(missing.length?[`Model parts unavailable: ${missing.join(', ')}.`]:[]),...(concepts.includes('seats')&&!this.seats?['Seat transform unavailable.']:[])].join(' ');
+    const regions=highlighted.filter(id=>DEMO_REGIONS[id]);
+    const missing=highlighted.filter(id=>MATERIAL_PARTS[id as ComponentId]&&!this.materials.some(m=>m.name===MATERIAL_PARTS[id as ComponentId]));
+    return [...(regions.length?['Approximate demo region highlighted.']:[]),...(missing.length?[`Model parts unavailable: ${missing.join(', ')}.`]:[]),...(concepts.includes('seats')&&!this.seats?['Seat transform unavailable.']:[])].join(' ');
   }
   private stopPulse(){clearInterval(this.timer);this.pulseMaterials=[];}
   dispose(){this.disposed=true;this.stopPulse();}
 }
 
-export type SurfaceProjection={part:'screen'|'vents';points:number[][];changed:boolean;selected:boolean};
+export type SurfaceProjection={part:DemoPart;points:number[][];changed:boolean;selected:boolean};
 export function surfaceCorners(part:'screen'|'vents',changed:boolean){
   const surface=SURFACES[part],size=changed?surface.after:surface.baseline;
   const normal=surface.normal,length=Math.hypot(normal[0],normal[1]);

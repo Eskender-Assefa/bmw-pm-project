@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { G60Controller, type ViewerAPI, type SceneSettings, type SurfaceProjection } from '@/lib/sketchfab-controller';
+import { G60Controller, DEMO_REGIONS, type ViewerAPI, type SceneSettings, type SurfaceProjection } from '@/lib/sketchfab-controller';
 import type { CameraView } from '@/lib/vehicle-priority';
 export const G60_SKETCHFAB_URL='https://sketchfab.com/models/ee328c2302494193a05cb4949b17ae55/embed';
 type SketchfabConstructor=new(version:string,frame:HTMLIFrameElement)=>{init:(id:string,options:{autostart:number;preload:number;camera:number;autospin:number;success:(api:ViewerAPI)=>void;error:(error:unknown)=>void})=>void};
@@ -54,9 +54,9 @@ export function SketchfabG60({highlighted,concepts,opacity,view,reset}:SceneSett
       return <g key={part} className={'model-surface'+(selected?' selected':'')+(changed?' changed':'')} data-surface={part} data-changed={changed}>
         <polygon points={points.map(p=>p.slice(0,2).join(',')).join(' ')} />
         {part==='vents'&&[.2,.4,.6,.8].map(t=>{const a=mix(points[0],points[3],t),b=mix(points[1],points[2],t);return <line key={t} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}/>;})}
-        {part==='screen'&&<text x={center[0]} y={center[1]} textAnchor="middle" dominantBaseline="middle">{changed?'DISPLAY +80%':'DISPLAY'}</text>}
+        {part!=='vents'&&<text x={center[0]} y={center[1]} textAnchor="middle" dominantBaseline="middle">{part==='screen'?(changed?'DISPLAY +80%':'DISPLAY'):DEMO_REGIONS[part]?.label}</text>}
       </g>;
-    })}</svg>{surfaces.length>0&&<div className="model-surface-label">{concepts.includes('screen')?'Display surface · +80% width':concepts.includes('vents')?'Vent opening · 3× height':'Selected dashboard region'}<small>Anchored concept overlay · x-ray view</small></div>}</div>
+    })}</svg>{(surfaces.length>0||concepts.includes('seats'))&&<div className="model-surface-label">{concepts.includes('seats')?'NEW SEATS · teal upholstery + revised profile':surfaces.some(s=>DEMO_REGIONS[s.part])?'Selected component region':concepts.includes('screen')?'Display surface · +80% width':concepts.includes('vents')?'Vent opening · 3× height':'Selected dashboard region'}<small>{concepts.includes('seats')?'Seat redesign demo applied':'Approximate concept highlight · x-ray view'}</small></div>}</div>
     <div className="hosted-model-status" role="status">{error?<><span>{error}</span><button onClick={()=>setAttempt(a=>a+1)}>Retry model</button></>:!ready?'Loading the model and its editable parts…':applying?'Updating hosted model…':notice||projectionError||((highlighted.length||concepts.length)?'Preview applied to the hosted G60.':'Hosted G60 ready. Select a problem to explore.')}</div>
     <p className="sketchfab-attribution"><a href="https://sketchfab.com/3d-models/2024-bmw-g60-ee328c2302494193a05cb4949b17ae55" target="_blank" rel="noopener noreferrer nofollow">2024 BMW G60</a> by <a href="https://sketchfab.com/csperamune" target="_blank" rel="noopener noreferrer nofollow">SLGA</a> on Sketchfab</p>
   </div>;

@@ -51,7 +51,7 @@ export function conceptForRequirement(r: Pick<RequirementView, 'feature' | 'titl
 export const DESIGN_CONCEPTS = {
   screen: {title: 'Panoramic display', metric: '+80%', detail: 'display width', description: 'Expanded display · +65% height'},
   vents: {title: 'Expanded air vents', metric: '3×', detail: 'opening height', description: 'Larger openings · +18% span'},
-  seats: {title: 'Adaptive seating', metric: '2 AXES', detail: 'seat assembly movement', description: '38 cm slide · 20 cm lift · illustrative assembly movement'},
+  seats: {title: 'New seat design', metric: 'NEW LOOK', detail: 'upholstery & profile', description: 'Teal upholstery · taller, wider profile · repositioned seat assembly'},
 } as const;
 export function approvalConcept(r: Pick<RequirementView,'feature'|'design_concept'>): Concept {
   if(r.design_concept)return r.design_concept;
@@ -60,4 +60,17 @@ export function approvalConcept(r: Pick<RequirementView,'feature'|'design_concep
 }
 export function approvedConcepts(requirements: RequirementView[]): Exclude<Concept,'baseline'>[] {
   return [...new Set(requirements.filter(r=>r.status==='approved'&&r.design_concept).map(r=>r.design_concept!))];
+}
+
+// Demo-only visual fallback. Keep AI classifications and the ten categories intact.
+export type DemoPart = ComponentId | 'body';
+export function demoPartForRequirement(r:Pick<RequirementView,'feature'|'title'|'description'|'category'>):DemoPart {
+  const exact=componentForRequirement(r);
+  if(exact)return exact;
+  const wording=`${r.feature} ${r.title}`.toLowerCase();
+  if(/power|performance|accelerat|horsepower|torque|fuel|engine/.test(wording))return 'drivetrain';
+  if(/screen|display|software|connectiv|audio|sound|media/.test(wording))return 'screen';
+  if(/seat|comfort|upholstery/.test(wording))return 'seats';
+  if(/climate|vent|heating|cooling/.test(wording))return 'vents';
+  return ({C01:'drivetrain',C02:'battery',C03:'body',C04:'assistance',C05:'seats',C06:'body',C07:'screen',C08:'seats',C09:'assistance',C10:'body'} as Record<string,DemoPart>)[r.category]||'body';
 }
