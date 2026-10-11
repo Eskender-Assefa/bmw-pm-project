@@ -2,6 +2,11 @@
 
 ## Application Trial — combined local website
 
+## Handover panels
+
+The sidebar also includes **Successor brief**, **USPs & cost**, and **Market trends** from `bmw-handover.zip`. Their FastAPI routes are `/api/v1/successor`, `/api/v1/usp`, and `/api/v1/trends`; Keep and Lead proposal reviews use `/api/v1/successor/{id}/review` and the existing audit trail. The trends register is `fixtures/market-trends.json`. Cost is an adjustable estimate, and trend summaries remain pending source review. The handover archive contains no RAC/RAG engine, so retrieval integration remains pending. The existing Problems, 3D model, merged view, evidence, comparison, decision, and Lovable-styled interface remain available.
+
+
 This editable copy has six sidebar tabs: Overview, Problems, 3D model, Evidence library, Comparisons, and Decisions & audit. Start with `npm run dev` and open **http://127.0.0.1:3001** (API: **8001**). Problems shows detailed needs, original source citations and scores. **Merge tabs** connects it side by side with the hosted BMW G60 model; the selection and filters persist between the two views. The model itself receives red part highlights, transparency, screen/vent surface concepts and seat upholstery previews through Sketchfab's supported API. Approved presets persist with PM decisions. Live AI part identification is authorized, enabled by default and has a visible local fallback. The separate RAG engine is not yet connected. See [the model notes](docs/G60_3D.md). The connected HTML Studio remains at `/studio.html`, and the original prototype remains at `/legacy/BMW_Product_Decision_Prototype.html`.
 
 For a fresh Linux checkout (Node.js 20.9+ and Python required):

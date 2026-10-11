@@ -22,9 +22,12 @@ TAG_GROUPS = {
 }
 TAG_MAP = {tag.casefold(): cat for cat, tags in TAG_GROUPS.items() for tag in tags.split('|')}
 
+def feature_slug(tag):
+    return re.sub(r'[^a-z0-9]+', '-', tag.casefold()).strip('-')[:95]
+
 def feature_for_tag(session, tag):
     tag = tag.strip() if tag and tag != 'no_class_found' else 'Unclassified feedback'
-    feature_id = re.sub(r'[^a-z0-9]+', '-', tag.casefold()).strip('-')[:95]
+    feature_id = feature_slug(tag)
     feature = session.get(Feature, feature_id)
     if feature:
         return feature

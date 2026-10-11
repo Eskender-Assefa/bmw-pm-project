@@ -12,7 +12,7 @@ from sqlalchemy import select, func, text
 from sqlalchemy.orm import Session
 from .db import session_dependency
 from .models import (Source,EvidenceRef,Feedback,Aspect,Feature,Fact,Vehicle,Requirement,RequirementRevision,Decision,AuditEvent,Job,Export,EvaluationLabel,AnalysisRun,now)
-from .schemas import (Cohort,RankingResponse,DecisionRequest,ImportRequest,JobView,AnalysisRequest,AnalysisProposal,ExportRequest,MappingReviewRequest,FactReviewRequest,EvaluationRequest,WebConnectorRequest)
+from .schemas import (Cohort,RankingResponse,DecisionRequest,ImportRequest,JobView,AnalysisRequest,AnalysisProposal,ExportRequest,MappingReviewRequest,FactReviewRequest,EvaluationRequest,WebConnectorRequest,UspResponse)
 from .services import ranking,detail,decide,evidence_detail,evaluation_metrics
 from .vehicle_target import TargetRequest, TargetResult, resolve_target
 from .taxonomy import CATEGORIES
@@ -20,6 +20,9 @@ from .audit import append_event,verify_audit
 from .config import DATA_DIR,DEFAULT_MODEL,PIPELINE_VERSION
 from .jobs import enqueue,recover_jobs,progress_messages
 from .comparisons import comparison
+from .usp import usp_evaluation,DEFAULT_COST_RATIO_LOW,DEFAULT_COST_RATIO_HIGH
+from .trends import trend_evaluation,TrendResponse,Horizon,Market
+from .successor import successor_brief,review_proposal,SuccessorResponse,SuccessorReviewRequest
 
 @asynccontextmanager
 async def lifespan(app):
@@ -237,6 +240,24 @@ def retry_job(job_id:str,db:DB):
 
 @app.get('/api/v1/comparisons')
 def comparisons(db:DB): return comparison(db)
+
+@app.get('/api/v1/usp',response_model=UspResponse)
+def usp(db:DB,cohort:COHORT,cost_ratio_low:float=Query(DEFAULT_COST_RATIO_LOW,gt=0,le=1),cost_ratio_high:float=Query(DEFAULT_COST_RATIO_HIGH,gt=0,le=1)):
+    if cost_ratio_low>cost_ratio_high: raise HTTPException(422,'The low cost ratio cannot exceed the high cost ratio.')
+    return usp_evaluation(db,cohort,cost_ratio_low,cost_ratio_high)
+
+@app.get('/api/v1/trends',response_model=TrendResponse)
+def trends(db:DB,cohort:COHORT,category:str|None=None,horizon:Horizon|None=None,market:Market|None=None):
+    if category and category not in CATEGORIES: raise HTTPException(422,'Unknown product category.')
+    return trend_evaluation(db,cohort,category,horizon,market)
+
+@app.get('/api/v1/successor',response_model=SuccessorResponse)
+def successor(db:DB,cohort:COHORT):
+    return successor_brief(db,cohort)
+
+@app.post('/api/v1/successor/{proposal_id}/review')
+def successor_review(proposal_id:str,request:SuccessorReviewRequest,db:DB):
+    return review_proposal(db,proposal_id,request)
 
 @app.get('/api/v1/decisions')
 def decisions(db:DB,limit:int=Query(50,le=200,ge=1)):
