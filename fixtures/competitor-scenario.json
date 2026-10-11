@@ -1,0 +1,24 @@
+{
+  "id": "de-bev-sedan-scenario-v1",
+  "version": "1.0",
+  "title": "A hypothetical sedan comparison",
+  "origin": "synthetic",
+  "scope_layer": "hypothetical",
+  "created_at": "2026-10-10T00:00:00Z",
+  "generator": "Authored demonstration fixture v1",
+  "market": "DE",
+  "powertrain": "BEV",
+  "assumptions": [
+    "Mercedes and BYD variants are fictional comparison entries, not actual specifications.",
+    "All entries assume a German-market battery-electric sedan configuration.",
+    "Only reviewed BMW facts with matching units and conditions can establish a comparable baseline.",
+    "Scenario values do not contribute to customer demand, priority or ROI."
+  ],
+  "input_references": ["G60_OptionList.PDF, July 2026, page 4"],
+  "bmw_variant": "i5 eDrive40",
+  "rows": [
+    {"label":"System power","unit":"kW","condition":"Published system rating","mercedes":260,"byd":280},
+    {"label":"Base price","unit":"EUR","condition":"German price including 19% VAT, excluding delivery","mercedes":69000,"byd":62000},
+    {"label":"Seat ventilation","unit":"availability","condition":"Selected variant and market","mercedes":"optional","byd":"standard"}
+  ]
+}
